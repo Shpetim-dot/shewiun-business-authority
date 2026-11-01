@@ -57,7 +57,7 @@ def evaluate_and_record(db: Session, *, organization_id: str, agent_id: str, act
             AuthorityGrant.principal_id == acting_for_id,
             AuthorityGrant.resource_id == resource_id,
             AuthorityGrant.revoked_at.is_(None),
-        )).all()
+        ).with_for_update()).all()
         # Eindeutige, aktive Ursprungsberechtigung: Mehrdeutigkeit wird nicht geraten.
         candidates = [g for g in grants if _utc(g.valid_from) <= now and (g.valid_until is None or now < _utc(g.valid_until))]
         if len(candidates) == 1:
@@ -67,7 +67,7 @@ def evaluate_and_record(db: Session, *, organization_id: str, agent_id: str, act
                 Delegation.organization_id == organization_id,
                 Delegation.grant_id == grant.id,
                 Delegation.revoked_at.is_(None),
-            )).all()
+            ).with_for_update()).all()
             by_id = {d.id: d for d in delegations}
             # Den zum Agenten gehörenden Pfad rückwärts auflösen. Zyklen/Mehrdeutigkeit fail-closed.
             terminal = [d for d in delegations if d.delegate_id == agent_id]
