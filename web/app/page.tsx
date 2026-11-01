@@ -12,7 +12,7 @@ const API_ORG = "org-alpenbank";
 const AGENT = "agent-payment-01";
 const CFO = "person-cfo-anna";
 const ACCOUNT = "konto-corporate-1001";
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_BASE = "/api/backend";
 
 const money = (value: number | string | null | undefined) =>
   value === null || value === undefined ? "—" : new Intl.NumberFormat("de-CH", { style: "currency", currency: "CHF", maximumFractionDigits: 0 }).format(Number(value));
@@ -52,11 +52,11 @@ export default function Home() {
     try {
       const [health, graph, audit, paymentRows, integrity, authority] = await Promise.all([
         fetch(`${API_BASE}/health`, { cache: "no-store" }),
-        fetch(`${API_BASE}/api/v1/autoritaetsgraph?organization_id=${API_ORG}`, { cache: "no-store" }),
-        fetch(`${API_BASE}/api/v1/sicherheitsereignisse?organization_id=${API_ORG}`, { cache: "no-store" }),
-        fetch(`${API_BASE}/api/v1/sandbox/zahlungen?organization_id=${API_ORG}`, { cache: "no-store" }),
-        fetch(`${API_BASE}/api/v1/audit/integritaet?organization_id=${API_ORG}`, { cache: "no-store" }),
-        fetch(`${API_BASE}/api/v1/agenten/${AGENT}/effektive-berechtigungen?organization_id=${API_ORG}&acting_for_id=${CFO}&resource_id=${ACCOUNT}`, { cache: "no-store" }),
+        fetch(`${API_BASE}/v1/autoritaetsgraph?organization_id=${API_ORG}`, { cache: "no-store" }),
+        fetch(`${API_BASE}/v1/sicherheitsereignisse?organization_id=${API_ORG}`, { cache: "no-store" }),
+        fetch(`${API_BASE}/v1/sandbox/zahlungen?organization_id=${API_ORG}`, { cache: "no-store" }),
+        fetch(`${API_BASE}/v1/audit/integritaet?organization_id=${API_ORG}`, { cache: "no-store" }),
+        fetch(`${API_BASE}/v1/agenten/${AGENT}/effektive-berechtigungen?organization_id=${API_ORG}&acting_for_id=${CFO}&resource_id=${ACCOUNT}`, { cache: "no-store" }),
       ]);
       if (!health.ok || !graph.ok || !audit.ok || !paymentRows.ok || !integrity.ok || !authority.ok) throw new Error("Backend nicht erreichbar");
       const graphData = await graph.json();
@@ -80,7 +80,7 @@ export default function Home() {
     setBusy(true);
     setResult(null);
     try {
-      const response = await fetch(`${API_BASE}/api/v1/sandbox/zahlungen`, {
+      const response = await fetch(`${API_BASE}/v1/sandbox/zahlungen`, {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ organization_id: API_ORG, agent_id: AGENT, acting_for_id: CFO,
           account_id: ACCOUNT, beneficiary: "Lieferant Beispiel AG", amount: amount.toFixed(2), currency: "CHF" }),
