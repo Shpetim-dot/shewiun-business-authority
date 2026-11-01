@@ -136,8 +136,8 @@ export default function Home() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           organization_id: API_ORG, agent_id: AGENT, acting_for_id: CFO,
-          resource_id: ACCOUNT, action: "payment.create",
-          amount: authInput.amount, currency: "CHF", ...authInput,
+          resource_id: ACCOUNT, action: "payment.create", currency: "CHF",
+          ...authInput,
         }),
       });
       const payload = await response.json();
