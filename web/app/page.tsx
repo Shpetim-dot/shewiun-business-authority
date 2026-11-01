@@ -45,24 +45,28 @@ export default function Home() {
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<{ ok: boolean; text: string } | null>(null);
   const [payments, setPayments] = useState(0);
+  const [effectiveLimit, setEffectiveLimit] = useState<number | null>(null);
   const [auditIntegrity, setAuditIntegrity] = useState<boolean | null>(null);
 
   async function loadData() {
     try {
-      const [health, graph, audit, paymentRows, integrity] = await Promise.all([
+      const [health, graph, audit, paymentRows, integrity, authority] = await Promise.all([
         fetch(`${API_BASE}/health`, { cache: "no-store" }),
         fetch(`${API_BASE}/api/v1/autoritaetsgraph?organization_id=${API_ORG}`, { cache: "no-store" }),
         fetch(`${API_BASE}/api/v1/sicherheitsereignisse?organization_id=${API_ORG}`, { cache: "no-store" }),
         fetch(`${API_BASE}/api/v1/sandbox/zahlungen?organization_id=${API_ORG}`, { cache: "no-store" }),
         fetch(`${API_BASE}/api/v1/audit/integritaet?organization_id=${API_ORG}`, { cache: "no-store" }),
+        fetch(`${API_BASE}/api/v1/agenten/${AGENT}/effektive-berechtigungen?organization_id=${API_ORG}&acting_for_id=${CFO}&resource_id=${ACCOUNT}`, { cache: "no-store" }),
       ]);
-      if (!health.ok || !graph.ok || !audit.ok || !paymentRows.ok || !integrity.ok) throw new Error("Backend nicht erreichbar");
+      if (!health.ok || !graph.ok || !audit.ok || !paymentRows.ok || !integrity.ok || !authority.ok) throw new Error("Backend nicht erreichbar");
       const graphData = await graph.json();
       setNodes(graphData.knoten || []);
       setEdges(graphData.verbindungen || []);
       setEvents(await audit.json());
       setPayments((await paymentRows.json()).length);
       setAuditIntegrity(Boolean((await integrity.json()).gueltig));
+      const authorityData = await authority.json();
+      setEffectiveLimit(authorityData.effektives_limit === null ? null : Number(authorityData.effektives_limit));
       setApiState("verbunden");
     } catch {
       setApiState("getrennt");
@@ -160,7 +164,7 @@ export default function Home() {
               </section>
               <section className="panel authority-panel">
                 <div className="panel-header"><div><div className="panel-kicker">WIRKSAME BERECHTIGUNG</div><h2>Zahlungsagent 01</h2><p>Abgeleitet aus der CFO-Vollmacht</p></div><Badge tone="good">AKTIV</Badge></div>
-                <div className="limit-block"><span>Wirksames Zahlungslimit</span><strong>CHF 10.000</strong><small>Ursprung: CHF 100.000 · Delegation: CHF 10.000</small></div>
+                <div className="limit-block"><span>Wirksames Zahlungslimit</span><strong>{effectiveLimit === null ? "—" : money(effectiveLimit)}</strong><small>Ursprung: CHF 100.000 · Delegation: CHF 10.000</small></div>
                 <div className="authority-row"><span>Handelnde Person</span><strong>Anna Müller · CFO</strong></div>
                 <div className="authority-row"><span>Ressource</span><strong>Geschäftskonto ·•••• 1001</strong></div>
                 <div className="authority-row"><span>Erlaubte Aktion</span><strong><code>payment.create</code></strong></div>
