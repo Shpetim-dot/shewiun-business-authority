@@ -58,6 +58,35 @@ Ein sinnvoller S-PRO-Test wäre die Integration in einen bestehenden, nicht prod
 
 ## Noch nicht als produktionsreif behaupten
 
-Der aktuelle Stand ist ein MVP. Insbesondere sind echte OIDC-/Workload-Authentifizierung, signierte kurzlebige Capabilities, kryptografisch gebundene menschliche Freigaben, PostgreSQL Row-Level Security, extern verankerte Audit-Nachweise, Migrationen und eine unabhängige Penetrationsprüfung noch nicht umgesetzt.
+Der aktuelle Stand ist ein MVP. Insbesondere sind echte OIDC-/Workload-Authentifizierung, signierte kurzlebige Capabilities, kryptografisch gebundene menschliche Freigaben, PostgreSQL Row-Level Security, extern verankerte Audit-Nachweise, eine vollständige versionierte DB-Migrationsstrategie und eine unabhängige Penetrationsprüfung noch nicht umgesetzt.
 
 Die Demo soll technische Substanz beweisen, ohne aus einem funktionierenden Sandbox-Kern bereits eine zertifizierte Bankensicherheitslösung abzuleiten.
+
+
+## Erweiterte Autorisierung im Demonstrator (Policy-Version 0.2.0)
+
+Der neue Tab **Autorisierung** zeigt nicht nur eine effektive Berechtigung, sondern die einzelnen Entscheidungsebenen, die zwischen Agenten-Tool und Geschäftsaktion liegen. Die Policy wertet sieben Kontrollen separat aus:
+
+1. **Identity:** aktiver Agent, Auftraggeber, Mandant und registrierter Demo-Aussteller.
+2. **Tool / Permission:** exakte Bindung von Tool, Permission und angeforderter Geschäftsaktion.
+3. **Purpose:** der deklarierte Geschäftszweck muss zur erlaubten Aktion passen.
+4. **Resource Scope:** Zugriff nur auf das konkret delegierte Konto; Wildcard- und globale Scopes werden abgelehnt.
+5. **Business Authority:** Ursprungsvollmacht und vollständiger Delegationspfad müssen gültig sein.
+6. **Parameters:** Betrag und Währung müssen innerhalb der wirksamen Autorität liegen.
+7. **Approval:** ab CHF 7.500 wird eine vorhandene und frische zusätzliche Freigabe verlangt.
+
+Die Oberfläche ergänzt dies um eine Authority-Delta-Ansicht: Ursprungsvollmacht, tatsächlich delegierte Aktionen, beim Vollmachtgeber verbleibende Rechte und erreichbare Geschäftsaktionen. Dadurch wird sichtbar, warum eine technisch vorhandene Tool-Permission allein keine geschäftliche Autorität begründet.
+
+### Gesprächsfähiger S-PRO-Demoablauf
+
+| Testfall | Erwartetes Ergebnis | Nachweis |
+|---|---|---|
+| CHF 5.000, korrekte Identität, Zweck und Ressource | ALLOW | Sieben erfolgreiche Kontrollpunkte; bestehender Sandbox-Zahlungsweg bleibt verfügbar |
+| Globaler Daten-Scope | DENY | Ressourcen-Scope schlägt fehl |
+| Abweichende Tool-/Permission-Bindung | DENY | Exakte Permission-Bindung schlägt fehl |
+| Unbekannter Runtime-Aussteller | DENY | Identity-Kontrolle schlägt fehl |
+| Zweck `account_enumeration` statt `supplier_payment` | DENY | Purpose-Kontrolle schlägt fehl |
+| CHF 8.000 ohne frische Freigabe | DENY | Approval-Kontrolle schlägt fehl |
+| CHF 8.000 mit frischer Demo-Freigabe | Policy-ALLOW | Alle Kontrollen bestehen; keine externe Runtime-Ausführung wird behauptet |
+
+Die Freigabe-Schalter im Demonstrator sind bewusst nur Testeingaben. Sie sind keine signierte, kurzlebige oder einmalig verwendbare Approval-Capability. Die dargestellte Entscheidung ist eine deterministische Policy-Evaluation. Für einen Pilot wären anschließend echte Workload-Identity, action-bound approvals und ein Enforcement-Adapter in der geschützten S-PRO-Geschäfts-API gemeinsam zu validieren.

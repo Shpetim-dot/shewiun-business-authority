@@ -7,6 +7,19 @@ type GraphNode = { id: string; label: string; typ: string; status: string; besch
 type GraphEdge = { id: string; von: string; nach: string; typ: string; limit?: number | null; waehrung?: string | null; aktionen?: string[]; delegierbar?: boolean | null; gueltig_bis?: string | null; beschreibung?: string | null };
 type EventItem = { id: string; zeitpunkt: string; agent: string; aktion: string; entscheidung: string; grund: string; betrag?: string | null };
 type ApiState = "pruefung" | "verbunden" | "getrennt";
+type PolicyCheck = { control: string; result: "pass" | "fail" | "not_applicable"; detail: string };
+type AuthorizationEvaluation = {
+  decision_id: string;
+  correlation_id: string;
+  entscheidung: "ALLOW" | "DENY";
+  grund: string;
+  effektives_limit: number | string | null;
+  delegationspfad: string[];
+  policy_version: string;
+  checks: PolicyCheck[];
+  approval_required: boolean;
+  trust: { claim_level: string; runtime_execution_observed: boolean; note: string };
+};
 
 const API_ORG = "org-alpenbank";
 const AGENT = "agent-payment-01";
@@ -48,6 +61,19 @@ export default function Home() {
   const [effectiveLimit, setEffectiveLimit] = useState<number | null>(null);
   const [auditIntegrity, setAuditIntegrity] = useState<boolean | null>(null);
   const [storageMode, setStorageMode] = useState("Nicht geprüft");
+  const [authBusy, setAuthBusy] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [authEvaluation, setAuthEvaluation] = useState<AuthorizationEvaluation | null>(null);
+  const [authInput, setAuthInput] = useState({
+    amount: "5000",
+    purpose: "supplier_payment",
+    runtime_identity: "shewiun-demo-issuer",
+    tool: "payment.create",
+    permission: "payment.create",
+    data_scope: ACCOUNT,
+    approval_present: false,
+    approval_fresh: false,
+  });
 
   async function loadData() {
     try {
@@ -100,17 +126,69 @@ export default function Home() {
     } finally { setBusy(false); }
   }
 
+
+  async function runAuthorizationEvaluation() {
+    setAuthBusy(true);
+    setAuthError(null);
+    try {
+      const response = await fetch(`${API_BASE}/v1/autorisierung/evaluieren`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          organization_id: API_ORG, agent_id: AGENT, acting_for_id: CFO,
+          resource_id: ACCOUNT, action: "payment.create",
+          amount: authInput.amount, currency: "CHF", ...authInput,
+        }),
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload?.detail || payload?.code || "Autorisierungsprüfung fehlgeschlagen.");
+      setAuthEvaluation(payload);
+      await loadData();
+    } catch (error) {
+      setAuthEvaluation(null);
+      setAuthError(error instanceof Error ? error.message : "Autorisierungsprüfung fehlgeschlagen.");
+    } finally {
+      setAuthBusy(false);
+    }
+  }
+
+  function setAuthorizationPreset(preset: string) {
+    const base = {
+      amount: "5000", purpose: "supplier_payment", runtime_identity: "shewiun-demo-issuer",
+      tool: "payment.create", permission: "payment.create", data_scope: ACCOUNT,
+      approval_present: false, approval_fresh: false,
+    };
+    const presets: Record<string, typeof base> = {
+      standard: base,
+      broad_scope: { ...base, data_scope: "*" },
+      permission_mismatch: { ...base, permission: "beneficiary.update" },
+      identity_mismatch: { ...base, runtime_identity: "unknown-runtime" },
+      purpose_mismatch: { ...base, purpose: "account_enumeration" },
+      approval_missing: { ...base, amount: "8000" },
+      approval_stale: { ...base, amount: "8000", approval_present: true },
+      approval_fresh: { ...base, amount: "8000", approval_present: true, approval_fresh: true },
+    };
+    setAuthInput(presets[preset] || base);
+    setAuthEvaluation(null);
+    setAuthError(null);
+  }
+
   const counts = useMemo(() => ({
     people: nodes.filter(n => n.typ === "MENSCH").length,
     agents: nodes.filter(n => n.typ === "KI_AGENT").length,
     resources: nodes.filter(n => n.typ === "RESSOURCE").length,
     denied: events.filter(e => e.entscheidung === "DENY").length,
   }), [nodes, events]);
+  const agentDelegation = edges.find(edge => edge.typ === "DELEGATION" && edge.nach === AGENT);
+  const originGrant = edges.find(edge => edge.typ === "VOLLMACHT" && edge.von === CFO);
+  const effectiveActions = agentDelegation?.aktionen || [];
+  const retainedByPrincipal = (originGrant?.aktionen || []).filter(action => !effectiveActions.includes(action));
 
   const nav = [
     { id: "uebersicht", label: "Übersicht", icon: "grid", group: "PLATTFORM" },
     { id: "graph", label: "Autoritätsgraph", icon: "graph", group: "AUTORITÄT" },
     { id: "berechtigungen", label: "Berechtigungen", icon: "shield", group: "AUTORITÄT" },
+    { id: "autorisierung", label: "Autorisierung", icon: "activity", group: "DURCHSETZUNG" },
     { id: "laufzeit", label: "Laufzeitkontrolle", icon: "activity", group: "DURCHSETZUNG" },
     { id: "freigaben", label: "Freigaben", icon: "check", group: "DURCHSETZUNG" },
     { id: "nachweise", label: "Sicherheitsnachweise", icon: "file", group: "GOVERNANCE" },
@@ -135,7 +213,7 @@ export default function Home() {
             </button>)}
           </div>)}
         </nav>
-        <div className="sidebar-bottom"><div className="environment"><span className="env-dot" />TESTUMGEBUNG</div><div className="sidebar-version">SHEWIUN BA · VERSION 0.1.0</div></div>
+        <div className="sidebar-bottom"><div className="environment"><span className="env-dot" />TESTUMGEBUNG</div><div className="sidebar-version">SHEWIUN BA · VERSION 0.2.0</div></div>
       </aside>
 
       <main className="main">
@@ -200,13 +278,98 @@ export default function Home() {
 
           {section === "berechtigungen" && <section className="panel"><div className="panel-header"><div><div className="panel-kicker">WIRKSAME BERECHTIGUNG</div><h2>Effektive Berechtigungen</h2><p>Die wirksame Berechtigung ergibt sich aus der Schnittmenge aller gültigen Autoritätsstufen.</p></div></div><div className="permission-chain"><div><small>URSPRUNGS-VOLLMACHT</small><strong>Anna Müller · CFO</strong><b>CHF 100.000</b><span>payment.create · payment.read · payment.approve</span></div><div className="chain-arrow">↓</div><div><small>DELEGATION</small><strong>Zahlungsagent 01</strong><b>CHF 10.000</b><span>payment.create · payment.read</span></div><div className="chain-arrow">↓</div><div className="effective-result"><small>EFFEKTIVE AUTORITÄT</small><strong>Minimale wirksame Grenze</strong><b>CHF 10.000</b><span>Weiterdelegation: nicht gestattet</span></div></div><div className="notice"><strong>Entscheidungsprinzip</strong><p>Eine Delegation kann Rechte einschränken, aber niemals die Ursprungsvollmacht erweitern. Nicht eindeutig auflösbare oder widerrufene Autoritätsketten werden verweigert.</p></div></section>}
 
+
+          {section === "autorisierung" && <div className="authorization-workspace">
+            <section className="panel">
+              <div className="panel-header">
+                <div><div className="panel-kicker">DETERMINISTISCHER POLICY DECISION POINT</div><h2>Eine Berechtigung ist noch keine ausführbare Geschäftsaktion.</h2>
+                  <p>SHEWIUN prüft den konkreten Auftrag entlang Identität, Permission-Bindung, Zweck, Ressource, Vollmacht, Parametern und Freigabe.</p></div>
+                <Badge tone="good">FAIL-CLOSED</Badge>
+              </div>
+              <div className="auth-flow">
+                <div><small>01 · IDENTITY</small><strong>Wer handelt?</strong><span>Agent · Aussteller · Auftraggeber</span></div><b>→</b>
+                <div><small>02 · CONTRACT</small><strong>Was ist erlaubt?</strong><span>Zweck · Tool · Permission</span></div><b>→</b>
+                <div><small>03 · PDP</small><strong>Was ist wirksam?</strong><span>Vollmacht · Ressource · Parameter</span></div><b>→</b>
+                <div><small>04 · PEP</small><strong>Ausführung sperren</strong><span>ALLOW / DENY vor Mutation</span></div><b>→</b>
+                <div><small>05 · EVIDENCE</small><strong>Nachweis</strong><span>Entscheidung · Policy · Hash-Kette</span></div>
+              </div>
+            </section>
+
+
+            <section className="panel auth-authority-analysis">
+              <div className="panel-header"><div><div className="panel-kicker">AUTHORITY DELTA · PERMISSION COMPOSITION</div><h2>Beabsichtigte, wirksame und nicht delegierte Autorität</h2><p>Die Gegenüberstellung basiert auf den geladenen Vollmachts- und Delegationsbeziehungen im Business Authority Graph.</p></div><Badge tone="good">GRAPH-BASIERT</Badge></div>
+              <div className="auth-analysis-grid">
+                <article><small>INTENDED AUTHORITY</small><strong>Lieferantenzahlung</strong><p>Geschäftszweck: supplier_payment</p><p>Ressource: Geschäftskonto ·•••• 1001</p><p>Konkrete Aktion: payment.create</p></article>
+                <article className="auth-analysis-effective"><small>EFFECTIVE AUTHORITY</small><strong>{money(agentDelegation?.limit)} {agentDelegation?.waehrung || "CHF"}</strong><p>Agent: Zahlungsagent 01</p><p>Aktionen: {effectiveActions.join(" · ") || "Nicht geladen"}</p><p>Weiterdelegation: {agentDelegation?.delegierbar ? "erlaubt" : "nicht gestattet"}</p></article>
+                <article><small>AUTHORITY DELTA</small><strong>{retainedByPrincipal.length} Rechte nicht übertragen</strong><p>{retainedByPrincipal.join(" · ") || "Keine zusätzlichen Rechte im Ursprung"} bleiben beim Vollmachtgeber.</p><p>Eine Tool-Permission erweitert diese Delegation nicht.</p></article>
+                <article><small>PERMISSION COMPOSITION</small><strong>Tool ≠ Business Authority</strong><p>Mehrere technisch verfügbare Tools ergeben keine neue geschäftliche Vollmacht.</p><p>Die finale Geschäftsaktion wird separat gegen Ressource, Zweck, Betrag und Freigabe geprüft.</p></article>
+              </div>
+              <div className="auth-reachability">
+                <div className="auth-reachability-heading"><strong>Business-Action-Reachability</strong><span>Abgeleitet aus den aktuell delegierten Aktionen</span></div>
+                {[
+                  {action:"payment.create",label:"Lieferantenzahlung erstellen",kind:effectiveActions.includes("payment.create")?"conditional":"denied",detail:"Nur mit gültiger Vollmacht, Konto-Scope, Betrag innerhalb des Limits und ggf. frischer Freigabe."},
+                  {action:"payment.read",label:"Zahlungen lesen",kind:effectiveActions.includes("payment.read")?"allowed":"denied",detail:"Nur im delegierten Ressourcen- und Mandantenkontext."},
+                  {action:"payment.approve",label:"Zahlung freigeben",kind:effectiveActions.includes("payment.approve")?"conditional":"denied",detail:"Die Ursprungsvollmacht enthält diese Aktion, sie wurde dem Agenten jedoch nicht übertragen."},
+                  {action:"beneficiary.update",label:"Begünstigte ändern",kind:"denied",detail:"Nicht Bestandteil der Ursprungsvollmacht und der Agentendelegation."},
+                ].map(item=><div className="auth-reachability-row" key={item.action}><code>{item.action}</code><strong>{item.label}</strong><Badge tone={item.kind === "allowed" ? "good" : item.kind === "conditional" ? "warn" : "bad"}>{item.kind === "allowed" ? "IM SCOPE" : item.kind === "conditional" ? "BEDINGT" : "NICHT DELEGIERT"}</Badge><p>{item.detail}</p></div>)}
+              </div>
+            </section>
+
+            <div className="authorization-grid">
+              <section className="panel auth-console">
+                <div className="panel-header"><div><div className="panel-kicker">POLICY-TESTKONSOLE</div><h2>Konkrete Agentenaktion prüfen</h2><p>Alle Eingaben werden serverseitig deterministisch ausgewertet und als Entscheidung protokolliert.</p></div><Badge tone="warn">SANDBOX</Badge></div>
+                <div className="auth-presets">
+                  <button onClick={() => setAuthorizationPreset("standard")}>Standardfall</button>
+                  <button onClick={() => setAuthorizationPreset("broad_scope")}>Breiter Scope</button>
+                  <button onClick={() => setAuthorizationPreset("permission_mismatch")}>Permission-Mismatch</button>
+                  <button onClick={() => setAuthorizationPreset("identity_mismatch")}>Falsche Identität</button>
+                  <button onClick={() => setAuthorizationPreset("purpose_mismatch")}>Falscher Zweck</button>
+                  <button onClick={() => setAuthorizationPreset("approval_missing")}>Freigabe fehlt</button>
+                  <button onClick={() => setAuthorizationPreset("approval_stale")}>Freigabe veraltet</button>
+                  <button onClick={() => setAuthorizationPreset("approval_fresh")}>Frische Freigabe</button>
+                </div>
+                <div className="auth-form-grid">
+                  <label className="auth-field"><span>Transaktionsbetrag · CHF</span><input type="number" min="0" step="0.01" value={authInput.amount} onChange={e => setAuthInput(v => ({ ...v, amount: e.target.value }))} /></label>
+                  <label className="auth-field"><span>Geschäftszweck</span><select value={authInput.purpose} onChange={e => setAuthInput(v => ({ ...v, purpose: e.target.value }))}><option value="supplier_payment">Lieferantenzahlung</option><option value="account_enumeration">Konten auflisten</option></select></label>
+                  <label className="auth-field"><span>Runtime-Aussteller</span><select value={authInput.runtime_identity} onChange={e => setAuthInput(v => ({ ...v, runtime_identity: e.target.value }))}><option value="shewiun-demo-issuer">Registrierter Demo-Aussteller</option><option value="unknown-runtime">Unbekannter Aussteller</option></select></label>
+                  <label className="auth-field"><span>Tool</span><select value={authInput.tool} onChange={e => setAuthInput(v => ({ ...v, tool: e.target.value }))}><option value="payment.create">payment.create</option><option value="payment.execute">payment.execute</option></select></label>
+                  <label className="auth-field"><span>Permission</span><select value={authInput.permission} onChange={e => setAuthInput(v => ({ ...v, permission: e.target.value }))}><option value="payment.create">payment.create</option><option value="beneficiary.update">beneficiary.update</option></select></label>
+                  <label className="auth-field"><span>Daten- / Ressourcenumfang</span><select value={authInput.data_scope} onChange={e => setAuthInput(v => ({ ...v, data_scope: e.target.value }))}><option value={ACCOUNT}>Nur Konto ·•••• 1001</option><option value="*">Alle Konten / global</option></select></label>
+                </div>
+                <div className="auth-approval">
+                  <div><strong>Zusätzliche Freigabe</strong><small>Ab CHF 7.500 verlangt die Demo-Policy eine vorhandene und frische Freigabe.</small></div>
+                  <label><input type="checkbox" checked={authInput.approval_present} onChange={e => setAuthInput(v => ({ ...v, approval_present: e.target.checked }))} /> Vorhanden</label>
+                  <label><input type="checkbox" checked={authInput.approval_fresh} onChange={e => setAuthInput(v => ({ ...v, approval_fresh: e.target.checked }))} /> Frisch</label>
+                </div>
+                {authError && <div className="result-box result-bad"><span>!</span><div><strong>Prüfung fehlgeschlagen</strong><p>{authError}</p></div></div>}
+                <div className="auth-submit-row"><button disabled={authBusy || apiState !== "verbunden" || !authInput.amount} className="button button-primary" onClick={runAuthorizationEvaluation}>{authBusy ? "Prüfung läuft …" : "Policy serverseitig auswerten"} <Icon name="arrow" /></button><span>Keine Zahlung wird in diesem Tab ausgeführt.</span></div>
+              </section>
+
+              <section className="panel auth-result-panel">
+                <div className="panel-header"><div><div className="panel-kicker">ENTSCHEIDUNGS-TRACE</div><h2>Prüfergebnis</h2><p>Einzelne Kontrollpunkte statt eines undurchsichtigen Gesamtscores.</p></div></div>
+                {!authEvaluation ? <div className="auth-empty">Wähle einen Testfall und starte die Policy-Auswertung. Die Entscheidung und alle Kontrollpunkte erscheinen hier.</div> : <>
+                  <div className={authEvaluation.entscheidung === "ALLOW" ? "auth-decision auth-allow" : "auth-decision auth-deny"}>
+                    <div><small>POLICY DECISION</small><strong>{authEvaluation.entscheidung}</strong><span>{authEvaluation.grund}</span></div>
+                    <Badge tone={authEvaluation.entscheidung === "ALLOW" ? "good" : "bad"}>{authEvaluation.entscheidung === "ALLOW" ? "ERLAUBT" : "VERWEIGERT"}</Badge>
+                  </div>
+                  <div className="auth-check-list">{authEvaluation.checks.map(check => <div className="auth-check-row" key={check.control}>
+                    <span className={check.result === "pass" ? "auth-check-state pass" : check.result === "fail" ? "auth-check-state fail" : "auth-check-state na"}>{check.result === "pass" ? "PASS" : check.result === "fail" ? "FAIL" : "N/A"}</span>
+                    <div><strong>{({ identity: "Identität", permission: "Tool / Permission", purpose: "Geschäftszweck", resource_scope: "Ressourcen-Scope", business_authority: "Business Authority", parameters: "Parameter & Limits", approval: "Freigabe" } as Record<string, string>)[check.control] || check.control}</strong><p>{check.detail}</p></div>
+                  </div>)}</div>
+                  <div className="auth-evidence"><div><small>DECISION ID</small><code>{authEvaluation.decision_id}</code></div><div><small>POLICY</small><code>{authEvaluation.policy_version}</code></div><div><small>DELEGATIONSPFAD</small><code>{authEvaluation.delegationspfad.join(" → ") || "—"}</code></div></div>
+                  <p className="auth-trust-note">Claim-Level: Policy-Evaluation · Runtime-Ausführung beobachtet: nein. Freigabestatus ist hier ein Demo-Testinput, keine kryptografisch verifizierte menschliche Freigabe.</p>
+                </>}
+              </section>
+            </div>
+          </div>}
+
           {section === "laufzeit" && <section className="panel"><div className="panel-header"><div><div className="panel-kicker">AUTORISIERUNGS-ENTSCHEIDUNGSINSTANZ</div><h2>Laufzeitkontrolle</h2><p>Jede geschützte Aktion wird unabhängig von der Agentenlogik serverseitig bewertet.</p></div><Badge tone="good">STANDARD: VERWEIGERN</Badge></div><EventTable events={events} /></section>}
 
           {section === "freigaben" && <section className="panel empty-state"><div className="empty-icon"><Icon name="check" /></div><h2>Freigabeworkflow in Vorbereitung</h2><p>Als nächster Ausbauschritt werden aktionsgebundene Freigaben mit Intent-Hash, Ablaufzeit und Einmalverwendung implementiert.</p><Badge tone="warn">NOCH NICHT IMPLEMENTIERT</Badge></section>}
 
           {section === "nachweise" && <section className="panel"><div className="panel-header"><div><div className="panel-kicker">PRÜFNACHWEISE</div><h2>Autorisierungsnachweise</h2><p>Gespeicherte Entscheidungen mit Policy-Version, Delegationspfad und Entscheidungsgrund.</p></div></div><EventTable events={events} /></section>}
 
-          {section === "system" && <section className="panel"><div className="panel-header"><div><div className="panel-kicker">SYSTEMSTATUS</div><h2>Integrationsstatus</h2><p>Technische Umgebung und aktuelle Schnittstellen.</p></div></div><div className="system-list"><div><span>Autorisierungs-API</span><Badge tone={apiState === "verbunden" ? "good" : "bad"}>{apiState === "verbunden" ? "Erreichbar" : "Nicht erreichbar"}</Badge></div><div><span>Datenhaltung</span><Badge tone={storageMode.startsWith("PostgreSQL") ? "good" : "warn"}>{storageMode}</Badge></div><div><span>Sandbox-Zahlungen</span><Badge tone="good">{payments} Datensätze</Badge></div><div><span>Policy-Version</span><code>SHEWIUN-BA-0.1.0</code></div><div><span>Audit-Integrität</span><Badge tone={auditIntegrity === true ? "good" : auditIntegrity === false ? "bad" : "warn"}>{auditIntegrity === true ? "Hash-Kette gültig" : auditIntegrity === false ? "Prüfung fehlgeschlagen" : "Nicht geprüft"}</Badge></div><div><span>Service-zu-Service</span><Badge tone={apiState === "verbunden" ? "good" : "warn"}>{apiState === "verbunden" ? "Geschützter Server-Proxy" : "Nicht verbunden"}</Badge></div>
+          {section === "system" && <section className="panel"><div className="panel-header"><div><div className="panel-kicker">SYSTEMSTATUS</div><h2>Integrationsstatus</h2><p>Technische Umgebung und aktuelle Schnittstellen.</p></div></div><div className="system-list"><div><span>Autorisierungs-API</span><Badge tone={apiState === "verbunden" ? "good" : "bad"}>{apiState === "verbunden" ? "Erreichbar" : "Nicht erreichbar"}</Badge></div><div><span>Datenhaltung</span><Badge tone={storageMode.startsWith("PostgreSQL") ? "good" : "warn"}>{storageMode}</Badge></div><div><span>Sandbox-Zahlungen</span><Badge tone="good">{payments} Datensätze</Badge></div><div><span>Policy-Version</span><code>SHEWIUN-BA-0.2.0</code></div><div><span>Audit-Integrität</span><Badge tone={auditIntegrity === true ? "good" : auditIntegrity === false ? "bad" : "warn"}>{auditIntegrity === true ? "Hash-Kette gültig" : auditIntegrity === false ? "Prüfung fehlgeschlagen" : "Nicht geprüft"}</Badge></div><div><span>Service-zu-Service</span><Badge tone={apiState === "verbunden" ? "good" : "warn"}>{apiState === "verbunden" ? "Geschützter Server-Proxy" : "Nicht verbunden"}</Badge></div>
           <div><span>Identitätsprüfung im Auftrag</span><Badge tone="warn">OIDC / Workload Identity als nächster Ausbauschritt</Badge></div></div></section>}
           <footer className="page-footer"><span>SHEWIUN GESCHÄFTLICHE AUTORITÄT</span><span>Technischer Demonstrator · Keine Produktionsfreigabe</span><span>© 2026 SHEWIUN</span></footer>
         </div>

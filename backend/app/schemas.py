@@ -11,6 +11,15 @@ class AuthorizationRequest(BaseModel):
     amount: Decimal | None = Field(default=None, ge=0, max_digits=18, decimal_places=2)
     currency: str | None = Field(default=None, min_length=3, max_length=3)
 
+class RuntimeAuthorizationRequest(AuthorizationRequest):
+    purpose: str = Field(min_length=1, max_length=100)
+    runtime_identity: str = Field(min_length=1, max_length=300)
+    tool: str = Field(min_length=1, max_length=100)
+    permission: str = Field(min_length=1, max_length=100)
+    data_scope: str = Field(min_length=1, max_length=100)
+    approval_present: bool = False
+    approval_fresh: bool = False
+
 class PaymentRequest(BaseModel):
     organization_id: str
     agent_id: str
@@ -19,6 +28,9 @@ class PaymentRequest(BaseModel):
     beneficiary: str = Field(min_length=2, max_length=200)
     amount: Decimal = Field(gt=0, max_digits=18, decimal_places=2)
     currency: str = Field(min_length=3, max_length=3)
+    purpose: str = Field(default="supplier_payment", min_length=1, max_length=100)
+    approval_present: bool = False
+    approval_fresh: bool = False
 
 class DelegationCreateRequest(BaseModel):
     organization_id: str = Field(min_length=1, max_length=80)

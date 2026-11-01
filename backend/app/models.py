@@ -80,6 +80,8 @@ class AuthorizationDecision(Base):
     grant_id: Mapped[str | None] = mapped_column(String(100))
     delegation_path: Mapped[list] = mapped_column(JSON, nullable=False)
     policy_version: Mapped[str] = mapped_column(String(40), nullable=False)
+    context: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
+    checks: Mapped[list] = mapped_column(JSON, nullable=False, default=list)
     evaluated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, nullable=False)
 
 class Payment(Base):

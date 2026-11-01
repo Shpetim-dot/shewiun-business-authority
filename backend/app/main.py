@@ -4,19 +4,20 @@ from uuid import uuid4
 from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from sqlalchemy import select
+from sqlalchemy import inspect, select, text
+from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session
 from .db import Base, SessionLocal, engine, get_db
 from .settings import settings
 from .demo_data import ensure_demo_data
 from .models import AuthorityGrant, AuthorizationDecision, BusinessResource, Delegation, Organization, Payment, Principal
-from .schemas import AuthorizationRequest, DecisionResponse, GraphEdge, GraphNode, PaymentRequest, PaymentResponse
+from .schemas import AuthorizationRequest, DecisionResponse, GraphEdge, GraphNode, PaymentRequest, PaymentResponse, RuntimeAuthorizationRequest
 from .services.authorization import evaluate_and_record, verify_audit_chain
 
 app = FastAPI(
     title="SHEWIUN | Business Authority",
     description="Geschäftliche Vollmachten, Delegationen und serverseitige Laufzeit-Autorisierung.",
-    version="0.1.0",
+    version="0.2.0",
 )
 # Nur lokale Entwicklungsoberfläche. Kundenumgebungen benötigen eine explizite Origin-Konfiguration.
 app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
@@ -35,9 +36,32 @@ async def protect_machine_api(request, call_next):
         return JSONResponse(status_code=401, content={"code": "MACHINE_AUTHENTICATION_REQUIRED"})
     return await call_next(request)
 
+def ensure_authorization_trace_schema() -> None:
+    """Additive compatibility migration for existing demo databases."""
+    if "authorization_decisions" not in inspect(engine).get_table_names():
+        return
+    existing = {column["name"] for column in inspect(engine).get_columns("authorization_decisions")}
+    additions = {
+        "context": "ALTER TABLE authorization_decisions ADD COLUMN context JSON NOT NULL DEFAULT '{}'",
+        "checks": "ALTER TABLE authorization_decisions ADD COLUMN checks JSON NOT NULL DEFAULT '[]'",
+    }
+    for column, statement in additions.items():
+        if column in existing:
+            continue
+        try:
+            with engine.begin() as connection:
+                connection.execute(text(statement))
+        except OperationalError:
+            # Multiple serverless instances may initialize against the same DB.
+            refreshed = {item["name"] for item in inspect(engine).get_columns("authorization_decisions")}
+            if column not in refreshed:
+                raise
+
+
 @app.on_event("startup")
 def startup() -> None:
     Base.metadata.create_all(bind=engine)
+    ensure_authorization_trace_schema()
     if settings.demo_seed_enabled:
         with SessionLocal() as db:
             ensure_demo_data(db)
@@ -101,6 +125,34 @@ def authorize(request: AuthorizationRequest, db: Session = Depends(get_db)):
         grund=result["reason_code"], effektives_limit=result["effective_limit"],
         delegationspfad=result["delegation_path"], policy_version=result["policy_version"])
 
+
+@app.post("/api/v1/autorisierung/evaluieren")
+def evaluate_runtime_authorization(request: RuntimeAuthorizationRequest, db: Session = Depends(get_db)):
+    result = evaluate_and_record(
+        db, organization_id=request.organization_id, agent_id=request.agent_id,
+        acting_for_id=request.acting_for_id, resource_id=request.resource_id,
+        action=request.action, amount=request.amount, currency=request.currency,
+        runtime_context={
+            "purpose": request.purpose, "runtime_identity": request.runtime_identity,
+            "tool": request.tool, "permission": request.permission,
+            "data_scope": request.data_scope, "approval_present": request.approval_present,
+            "approval_fresh": request.approval_fresh,
+        },
+    )
+    db.commit()
+    return {
+        "decision_id": result["decision_id"], "correlation_id": result["correlation_id"],
+        "entscheidung": "ALLOW" if result["allowed"] else "DENY",
+        "grund": result["reason_code"], "effektives_limit": result["effective_limit"],
+        "delegationspfad": result["delegation_path"], "policy_version": result["policy_version"],
+        "checks": result["checks"], "context": result["context"],
+        "approval_required": result["approval_required"],
+        "trust": {
+            "claim_level": "policy-evaluation", "runtime_execution_observed": False,
+            "note": "SHEWIUN bewertet den übergebenen Demo-Kontext deterministisch. Es wird keine externe Runtime-Ausführung behauptet.",
+        },
+    }
+
 @app.get("/api/v1/agenten/{agent_id}/effektive-berechtigungen")
 def effective_authority(agent_id: str, organization_id: str, acting_for_id: str, resource_id: str, db: Session = Depends(get_db)):
     # Die Anzeige verwendet dieselbe Entscheidungslogik wie der Enforcement-Pfad.
@@ -116,7 +168,13 @@ def create_sandbox_payment(request: PaymentRequest, db: Session = Depends(get_db
     try:
         result = evaluate_and_record(db, organization_id=request.organization_id, agent_id=request.agent_id,
             acting_for_id=request.acting_for_id, resource_id=request.account_id, action="payment.create",
-            amount=request.amount, currency=request.currency)
+            amount=request.amount, currency=request.currency,
+            runtime_context={
+                "purpose": request.purpose, "runtime_identity": "shewiun-demo-issuer",
+                "tool": "payment.create", "permission": "payment.create",
+                "data_scope": request.account_id, "approval_present": request.approval_present,
+                "approval_fresh": request.approval_fresh,
+            })
         if not result["allowed"]:
             db.commit()  # DENY-Nachweis bleibt erhalten; keine Payment-Mutation.
             raise HTTPException(status_code=403, detail={"code": result["reason_code"], "decision_id": result["decision_id"]})
@@ -148,7 +206,8 @@ def security_events(organization_id: str, limit: int = 50, db: Session = Depends
     return [{"id": r.id, "zeitpunkt": r.evaluated_at.isoformat(), "agent": r.principal_id,
              "aktion": r.action, "entscheidung": r.decision, "grund": r.reason_code,
              "ressource": r.resource_id, "betrag": str(r.requested_amount) if r.requested_amount is not None else None,
-             "policy_version": r.policy_version, "delegationspfad": r.delegation_path} for r in rows]
+             "policy_version": r.policy_version, "delegationspfad": r.delegation_path,
+             "kontext": r.context, "checks": r.checks} for r in rows]
 
 
 @app.get("/api/v1/audit/integritaet")

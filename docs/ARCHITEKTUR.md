@@ -35,3 +35,12 @@ Die Hash-Kette macht nachträgliche Veränderungen erkennbar, sofern ein Angreif
 ## Abgrenzung
 
 Der MVP demonstriert das fachliche Autoritätsmodell und die serverseitige Entscheidung für eine synthetische Zahlungs-Sandbox. Er enthält noch keine produktive Authentifizierung, keine vollständige Approval-Capability, keine DB-Row-Level-Security, keine externe Signaturinfrastruktur und keine hochverfügbare Betriebsarchitektur. Diese Punkte sind ausdrücklich nächste Ausbaustufen und dürfen nicht als bereits umgesetzt dargestellt werden.
+
+
+## Laufzeit-Autorisierungsvertrag (Demo, Policy-Version 0.2.0)
+
+Die zusätzliche Policy-Auswertung übernimmt das mehrdimensionale Prüfmodell aus dem AgentProof-Arbeitsstand: Identität, exakte Tool-/Permission-Bindung, Geschäftszweck, konkrete Datenreichweite, Business Authority, Aktionsparameter und zusätzliche Freigabe werden einzeln bewertet. Jede Kontrolle liefert PASS, FAIL oder N/A; jede fehlgeschlagene Kontrolle führt zu DENY.
+
+Für den Bank-Demofall ist `payment.create` ausschließlich für den Zweck `supplier_payment` vorgesehen. Tool und Permission müssen exakt auf die Geschäftsaktion passen. Der Daten-Scope muss dem konkreten Konto entsprechen; globale oder Wildcard-Scopes werden verweigert. Die zugrunde liegende Vollmachts- und Delegationsprüfung bleibt die maßgebliche Business-Authority-Quelle. Ab CHF 7.500 fordert die Demo-Policy zusätzlich eine vorhandene und frische Freigabe.
+
+**Wichtige Grenze:** Der Freigabestatus im neuen Test-Tab ist ein kontrollierter Demo-Testinput. Er stellt noch keine kryptografisch gebundene, einmalig verwendbare menschliche Approval-Capability dar. Ebenso ist die angezeigte Entscheidung eine Policy-Evaluation und kein Nachweis, dass ein externes Agenten-Runtime-System die Aktion tatsächlich ausgeführt hat. Signierte Runtime-Ingestion, Replay-Schutz mit dauerhaftem Nonce-Speicher und produktive Workload-Identity bleiben separate Ausbaustufen.
