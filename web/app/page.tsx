@@ -118,7 +118,7 @@ export default function Home() {
       <aside className="sidebar">
         <div className="brand">
           <div className="brand-mark"><span /></div>
-          <div><div className="brand-name">SHEWIUN</div><div className="brand-sub">BUSINESS AUTHORITY</div></div>
+          <div><div className="brand-name">SHEWIUN</div><div className="brand-sub">GESCHÄFTLICHE AUTORITÄT</div></div>
         </div>
         <div className="tenant-switch"><span className="tenant-icon">A</span><div><small>MANDANT</small><strong>Alpenbank Demo AG</strong></div><span className="chevron">⌄</span></div>
         <nav>
@@ -129,7 +129,7 @@ export default function Home() {
             </button>)}
           </div>)}
         </nav>
-        <div className="sidebar-bottom"><div className="environment"><span className="env-dot" />SANDBOX-UMGEBUNG</div><div className="sidebar-version">SHEWIUN BA · VERSION 0.1.0</div></div>
+        <div className="sidebar-bottom"><div className="environment"><span className="env-dot" />TESTUMGEBUNG</div><div className="sidebar-version">SHEWIUN BA · VERSION 0.1.0</div></div>
       </aside>
 
       <main className="main">
@@ -140,7 +140,7 @@ export default function Home() {
 
         <div className="content">
           <div className="page-heading">
-            <div><div className="eyebrow">GESCHÄFTLICHE AUTORISIERUNG · CONTROL PLANE</div><h1>{title()}</h1><p>Geschäftliche Vollmachten nachvollziehen. Delegierte Rechte begrenzen. Aktionen vor Ausführung kontrollieren.</p></div>
+            <div><div className="eyebrow">STEUERUNG GESCHÄFTLICHER BERECHTIGUNGEN</div><h1>{title()}</h1><p>Geschäftliche Vollmachten nachvollziehen. Delegierte Rechte begrenzen. Aktionen vor Ausführung kontrollieren.</p></div>
             <div className="heading-actions"><button className="button button-secondary" onClick={loadData}><span>↻</span> Aktualisieren</button><button className="button button-primary" onClick={() => setSection("graph")}>Autoritätsgraph öffnen <Icon name="arrow" /></button></div>
           </div>
 
@@ -159,7 +159,7 @@ export default function Home() {
                 <div className="graph-legend"><span><i className="legend-human" />Mensch</span><span><i className="legend-agent" />KI-Agent</span><span><i className="legend-resource" />Ressource</span><span><i className="legend-line" />Delegation / Vollmacht</span></div>
               </section>
               <section className="panel authority-panel">
-                <div className="panel-header"><div><div className="panel-kicker">EFFEKTIVE BERECHTIGUNG</div><h2>Zahlungsagent 01</h2><p>Abgeleitet aus der CFO-Vollmacht</p></div><Badge tone="good">AKTIV</Badge></div>
+                <div className="panel-header"><div><div className="panel-kicker">WIRKSAME BERECHTIGUNG</div><h2>Zahlungsagent 01</h2><p>Abgeleitet aus der CFO-Vollmacht</p></div><Badge tone="good">AKTIV</Badge></div>
                 <div className="limit-block"><span>Wirksames Zahlungslimit</span><strong>CHF 10.000</strong><small>Ursprung: CHF 100.000 · Delegation: CHF 10.000</small></div>
                 <div className="authority-row"><span>Handelnde Person</span><strong>Anna Müller · CFO</strong></div>
                 <div className="authority-row"><span>Ressource</span><strong>Geschäftskonto ·•••• 1001</strong></div>
@@ -170,7 +170,7 @@ export default function Home() {
             </div>
 
             <section className="panel test-panel">
-              <div className="panel-header"><div><div className="panel-kicker">LIVE-ENFORCEMENT · SANDBOX</div><h2>Autorisierung praktisch prüfen</h2><p>Die Aktion wird durch die API geprüft. Nur eine erlaubte Aktion erzeugt einen Zahlungsdatensatz.</p></div><Badge tone="warn">SYNTHETISCHE DATEN</Badge></div>
+              <div className="panel-header"><div><div className="panel-kicker">LAUFZEIT-DURCHSETZUNG · TESTUMGEBUNG</div><h2>Autorisierung praktisch prüfen</h2><p>Die Aktion wird durch die API geprüft. Nur eine erlaubte Aktion erzeugt einen Zahlungsdatensatz.</p></div><Badge tone="warn">SYNTHETISCHE DATEN</Badge></div>
               <div className="test-actions"><div className="test-case"><div><strong>Reguläre Zahlung</strong><small>CHF 5.000 · innerhalb der delegierten Vollmacht</small></div><button disabled={busy || apiState !== "verbunden"} className="button button-primary" onClick={() => runPayment(5000)}>Zahlung ausführen <Icon name="arrow" /></button></div><div className="test-case"><div><strong>Limitüberschreitung</strong><small>CHF 15.000 · oberhalb der delegierten Vollmacht</small></div><button disabled={busy || apiState !== "verbunden"} className="button button-danger" onClick={() => runPayment(15000)}>Verweigerung testen <Icon name="arrow" /></button></div></div>
               {result && <div className={result.ok ? "result-box result-good" : "result-box result-bad"}><span>{result.ok ? "✓" : "!"}</span><div><strong>{result.ok ? "Aktion autorisiert" : "Aktion verweigert"}</strong><p>{result.text}</p></div></div>}
             </section>
@@ -178,18 +178,18 @@ export default function Home() {
             <section className="panel events-panel"><div className="panel-header"><div><div className="panel-kicker">NACHVOLLZIEHBARKEIT</div><h2>Letzte Autorisierungsentscheidungen</h2></div><Badge tone={auditIntegrity === true ? "good" : auditIntegrity === false ? "bad" : "warn"}>{auditIntegrity === true ? "HASH-KETTE GÜLTIG" : auditIntegrity === false ? "HASH-KETTE FEHLERHAFT" : "INTEGRITÄT UNGEPRÜFT"}</Badge><button className="text-button" onClick={() => setSection("laufzeit")}>Alle Ereignisse <Icon name="arrow" /></button></div><EventTable events={events.slice(0, 5)} /></section>
           </>}
 
-          {section === "graph" && <section className="panel graph-full"><div className="panel-header"><div><div className="panel-kicker">BUSINESS AUTHORITY GRAPH</div><h2>Autoritätsbeziehungen</h2><p>Die Darstellung basiert auf den im Backend gespeicherten Vollmachten und Delegationen.</p></div><Badge tone="good">BACKEND-DATEN</Badge></div><AuthorityGraph nodes={nodes} edges={edges} large /><div className="graph-legend"><span><i className="legend-human" />Mensch</span><span><i className="legend-agent" />KI-Agent</span><span><i className="legend-resource" />Ressource</span><span><i className="legend-line" />Vollmacht / Delegation</span></div><div className="graph-table"><h3>Beziehungen im Graph</h3><table><thead><tr><th>Typ</th><th>Von</th><th>Nach</th><th>Limit</th></tr></thead><tbody>{edges.map(e=><tr key={e.id}><td>{e.typ}</td><td>{e.von}</td><td>{e.nach}</td><td>{money(e.limit)}</td></tr>)}</tbody></table></div></section>}
+          {section === "graph" && <section className="panel graph-full"><div className="panel-header"><div><div className="panel-kicker">GESCHÄFTLICHE AUTORITÄT GRAPH</div><h2>Autoritätsbeziehungen</h2><p>Die Darstellung basiert auf den im Backend gespeicherten Vollmachten und Delegationen.</p></div><Badge tone="good">BACKEND-DATEN</Badge></div><AuthorityGraph nodes={nodes} edges={edges} large /><div className="graph-legend"><span><i className="legend-human" />Mensch</span><span><i className="legend-agent" />KI-Agent</span><span><i className="legend-resource" />Ressource</span><span><i className="legend-line" />Vollmacht / Delegation</span></div><div className="graph-table"><h3>Beziehungen im Graph</h3><table><thead><tr><th>Typ</th><th>Von</th><th>Nach</th><th>Limit</th></tr></thead><tbody>{edges.map(e=><tr key={e.id}><td>{e.typ}</td><td>{e.von}</td><td>{e.nach}</td><td>{money(e.limit)}</td></tr>)}</tbody></table></div></section>}
 
-          {section === "berechtigungen" && <section className="panel"><div className="panel-header"><div><div className="panel-kicker">EFFECTIVE AUTHORITY</div><h2>Effektive Berechtigungen</h2><p>Die wirksame Berechtigung ergibt sich aus der Schnittmenge aller gültigen Autoritätsstufen.</p></div></div><div className="permission-chain"><div><small>URSPRUNGS-VOLLMACHT</small><strong>Anna Müller · CFO</strong><b>CHF 100.000</b><span>payment.create · payment.read · payment.approve</span></div><div className="chain-arrow">↓</div><div><small>DELEGATION</small><strong>Zahlungsagent 01</strong><b>CHF 10.000</b><span>payment.create · payment.read</span></div><div className="chain-arrow">↓</div><div className="effective-result"><small>EFFEKTIVE AUTORITÄT</small><strong>Minimale wirksame Grenze</strong><b>CHF 10.000</b><span>Weiterdelegation: nicht gestattet</span></div></div><div className="notice"><strong>Entscheidungsprinzip</strong><p>Eine Delegation kann Rechte einschränken, aber niemals die Ursprungsvollmacht erweitern. Nicht eindeutig auflösbare oder widerrufene Autoritätsketten werden verweigert.</p></div></section>}
+          {section === "berechtigungen" && <section className="panel"><div className="panel-header"><div><div className="panel-kicker">WIRKSAME BERECHTIGUNG</div><h2>Effektive Berechtigungen</h2><p>Die wirksame Berechtigung ergibt sich aus der Schnittmenge aller gültigen Autoritätsstufen.</p></div></div><div className="permission-chain"><div><small>URSPRUNGS-VOLLMACHT</small><strong>Anna Müller · CFO</strong><b>CHF 100.000</b><span>payment.create · payment.read · payment.approve</span></div><div className="chain-arrow">↓</div><div><small>DELEGATION</small><strong>Zahlungsagent 01</strong><b>CHF 10.000</b><span>payment.create · payment.read</span></div><div className="chain-arrow">↓</div><div className="effective-result"><small>EFFEKTIVE AUTORITÄT</small><strong>Minimale wirksame Grenze</strong><b>CHF 10.000</b><span>Weiterdelegation: nicht gestattet</span></div></div><div className="notice"><strong>Entscheidungsprinzip</strong><p>Eine Delegation kann Rechte einschränken, aber niemals die Ursprungsvollmacht erweitern. Nicht eindeutig auflösbare oder widerrufene Autoritätsketten werden verweigert.</p></div></section>}
 
-          {section === "laufzeit" && <section className="panel"><div className="panel-header"><div><div className="panel-kicker">POLICY DECISION POINT</div><h2>Laufzeitkontrolle</h2><p>Jede geschützte Aktion wird unabhängig von der Agentenlogik serverseitig bewertet.</p></div><Badge tone="good">DEFAULT DENY</Badge></div><EventTable events={events} /></section>}
+          {section === "laufzeit" && <section className="panel"><div className="panel-header"><div><div className="panel-kicker">AUTORISIERUNGS-ENTSCHEIDUNGSINSTANZ</div><h2>Laufzeitkontrolle</h2><p>Jede geschützte Aktion wird unabhängig von der Agentenlogik serverseitig bewertet.</p></div><Badge tone="good">STANDARD: VERWEIGERN</Badge></div><EventTable events={events} /></section>}
 
           {section === "freigaben" && <section className="panel empty-state"><div className="empty-icon"><Icon name="check" /></div><h2>Freigabeworkflow in Vorbereitung</h2><p>Als nächster Ausbauschritt werden aktionsgebundene Freigaben mit Intent-Hash, Ablaufzeit und Einmalverwendung implementiert.</p><Badge tone="warn">NOCH NICHT IMPLEMENTIERT</Badge></section>}
 
-          {section === "nachweise" && <section className="panel"><div className="panel-header"><div><div className="panel-kicker">AUDIT EVIDENCE</div><h2>Autorisierungsnachweise</h2><p>Gespeicherte Entscheidungen mit Policy-Version, Delegationspfad und Entscheidungsgrund.</p></div></div><EventTable events={events} /></section>}
+          {section === "nachweise" && <section className="panel"><div className="panel-header"><div><div className="panel-kicker">PRÜFNACHWEISE</div><h2>Autorisierungsnachweise</h2><p>Gespeicherte Entscheidungen mit Policy-Version, Delegationspfad und Entscheidungsgrund.</p></div></div><EventTable events={events} /></section>}
 
           {section === "system" && <section className="panel"><div className="panel-header"><div><div className="panel-kicker">SYSTEMSTATUS</div><h2>Integrationsstatus</h2><p>Technische Umgebung und aktuelle Schnittstellen.</p></div></div><div className="system-list"><div><span>Autorisierungs-API</span><Badge tone={apiState === "verbunden" ? "good" : "bad"}>{apiState === "verbunden" ? "Erreichbar" : "Nicht erreichbar"}</Badge></div><div><span>PostgreSQL</span><Badge tone={apiState === "verbunden" ? "good" : "warn"}>{apiState === "verbunden" ? "Über API verbunden" : "Status unbekannt"}</Badge></div><div><span>Sandbox-Zahlungen</span><Badge tone="good">{payments} Datensätze</Badge></div><div><span>Policy-Version</span><code>SHEWIUN-BA-0.1.0</code></div><div><span>Audit-Integrität</span><Badge tone={auditIntegrity === true ? "good" : auditIntegrity === false ? "bad" : "warn"}>{auditIntegrity === true ? "Hash-Kette gültig" : auditIntegrity === false ? "Prüfung fehlgeschlagen" : "Nicht geprüft"}</Badge></div><div><span>Authentifizierung</span><Badge tone="warn">Demo-Modus · keine OIDC-Prüfung</Badge></div></div></section>}
-          <footer className="page-footer"><span>SHEWIUN BUSINESS AUTHORITY</span><span>Technischer Demonstrator · Keine Produktionsfreigabe</span><span>© 2026 SHEWIUN</span></footer>
+          <footer className="page-footer"><span>SHEWIUN GESCHÄFTLICHE AUTORITÄT</span><span>Technischer Demonstrator · Keine Produktionsfreigabe</span><span>© 2026 SHEWIUN</span></footer>
         </div>
       </main>
     </div>
