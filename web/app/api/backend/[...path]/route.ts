@@ -11,8 +11,9 @@ async function proxy(request: NextRequest, context: RouteContext) {
   }
 
   const { path = [] } = await context.params;
-  const endpoint = path[0] === "health" ? "/health" : `/api/${path.join("/")}`;
-  const target = new URL(`${endpoint}${request.nextUrl.search}`, `${base.replace(/\\/+$/, "")}/`);
+  const endpoint = path[0] === "health" ? "/health" : \`/api/\${path.join("/")}\`;
+  const normalizedBase = base.endsWith("/") ? base.slice(0, -1) : base;
+  const target = new URL(\`\${endpoint}\${request.nextUrl.search}\`, \`\${normalizedBase}/\`);
 
   const headers = new Headers();
   headers.set("x-shewiun-api-key", secret);
