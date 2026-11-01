@@ -1,10 +1,12 @@
 from datetime import datetime, timezone
+import hashlib
+import json
 from decimal import Decimal
 from uuid import uuid4
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from ..domain.authority import AuthorityLayer, calculate_effective_authority
-from ..models import AuthorityGrant, AuthorizationDecision, BusinessResource, Delegation, Organization, Principal
+from ..models import AuditEvent, AuthorityGrant, AuthorizationDecision, BusinessResource, Delegation, Organization, Principal
 
 POLICY_VERSION = "SHEWIUN-BA-0.1.0"
 
@@ -123,6 +125,28 @@ def evaluate_and_record(db: Session, *, organization_id: str, agent_id: str, act
     )
     db.add(row)
     db.flush()
+
+    # Hash-verketteter Nachweis. Die Mandantenzeile serialisiert die Sequenzvergabe
+    # bei parallelen Entscheidungen innerhalb derselben Organisation.
+    locked_org = db.scalar(select(Organization).where(Organization.id == organization_id).with_for_update())
+    if locked_org is not None:
+        previous = db.scalar(select(AuditEvent).where(AuditEvent.organization_id == organization_id)
+            .order_by(AuditEvent.sequence.desc()).limit(1).with_for_update())
+        sequence = (previous.sequence + 1) if previous else 1
+        previous_hash = previous.event_hash if previous else ("0" * 64)
+        payload = {
+            "entscheidung_id": decision_id, "principal_id": agent_id, "acting_for_id": acting_for_id,
+            "ressource_id": resource_id, "aktion": action, "entscheidung": "ALLOW" if allowed else "DENY",
+            "grund": reason, "betrag": str(amount) if amount is not None else None,
+            "waehrung": currency, "delegationspfad": path, "policy_version": POLICY_VERSION,
+            "korrelations_id": correlation_id,
+        }
+        canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+        event_hash = hashlib.sha256(f"{previous_hash}|{sequence}|{canonical}".encode("utf-8")).hexdigest()
+        db.add(AuditEvent(id=str(uuid4()), organization_id=organization_id, sequence=sequence,
+            event_type="AUTORISIERUNGSENTSCHEIDUNG", actor_id=agent_id, payload=payload,
+            previous_hash=previous_hash, event_hash=event_hash))
+
     return {"decision_id": decision_id, "allowed": allowed, "reason_code": reason,
             "effective_limit": effective_limit, "delegation_path": path,
             "policy_version": POLICY_VERSION, "correlation_id": correlation_id}
