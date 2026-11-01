@@ -47,6 +47,7 @@ class GraphNode(BaseModel):
     label: str
     typ: str
     status: str
+    beschreibung: str | None = None
 
 class GraphEdge(BaseModel):
     id: str
@@ -54,3 +55,8 @@ class GraphEdge(BaseModel):
     nach: str
     typ: str
     limit: Decimal | None = None
+    waehrung: str | None = None
+    aktionen: list[str] = []
+    delegierbar: bool | None = None
+    gueltig_bis: datetime | None = None
+    beschreibung: str | None = None
