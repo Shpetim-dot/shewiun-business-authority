@@ -32,7 +32,7 @@ def _layer_from_delegation(item: Delegation) -> AuthorityLayer:
 
 def evaluate_and_record(db: Session, *, organization_id: str, agent_id: str, acting_for_id: str,
                         resource_id: str, action: str, amount: Decimal | None = None,
-                        currency: str | None = None) -> dict:
+                        currency: str | None = None, record_decision: bool = True) -> dict:
     """Fail-closed PDP. Persistiert jede Entscheidung; ruft keine LLM-Komponente auf."""
     now = datetime.now(timezone.utc)
     decision_id = str(uuid4())
@@ -115,6 +115,11 @@ def evaluate_and_record(db: Session, *, organization_id: str, agent_id: str, act
                 root_currency = db.get(AuthorityGrant, grant_id).currency
             if root_currency and root_currency != currency:
                 allowed, reason = False, "WAEHRUNGSKONFLIKT"
+
+    if not record_decision:
+        return {"decision_id": None, "allowed": allowed, "reason_code": reason,
+                "effective_limit": effective_limit, "delegation_path": path,
+                "policy_version": POLICY_VERSION, "correlation_id": correlation_id}
 
     row = AuthorizationDecision(
         id=decision_id, correlation_id=correlation_id, organization_id=organization_id,
