@@ -26,6 +26,12 @@ Für eine Delegationskette müssen alle Stufen gültig sein, dieselbe Ressource 
 7. Entscheidung mit Korrelations-ID und Policy-Version persistieren.
 8. Geschützte Geschäftsaktion nur bei ALLOW innerhalb derselben Datenbanktransaktion ausführen.
 
+## Audit-Nachweis
+
+Jede persistierte Autorisierungsentscheidung erzeugt im selben Datenbank-Commit ein Audit-Ereignis. Die Ereignisse werden je Mandant sequenziert und über SHA-256 mit dem vorherigen Ereignis verkettet. Der Endpunkt `GET /api/v1/audit/integritaet?organization_id=...` prüft Sequenz, Vorgängerhash und Ereignishash.
+
+Die Hash-Kette macht nachträgliche Veränderungen erkennbar, sofern ein Angreifer nicht zugleich die gesamte Kette und den vertrauenswürdigen letzten Hash kontrolliert. Sie ist kein WORM-Speicher und keine externe Signatur. Für Produktionsbetrieb wären getrennte Schreibrechte, externe Ankerung/Signierung und manipulationsgeschützte Aufbewahrung erforderlich.
+
 ## Abgrenzung
 
 Der MVP demonstriert das fachliche Autoritätsmodell und die serverseitige Entscheidung für eine synthetische Zahlungs-Sandbox. Er enthält noch keine produktive Authentifizierung, keine vollständige Approval-Capability, keine DB-Row-Level-Security, keine externe Signaturinfrastruktur und keine hochverfügbare Betriebsarchitektur. Diese Punkte sind ausdrücklich nächste Ausbaustufen und dürfen nicht als bereits umgesetzt dargestellt werden.
