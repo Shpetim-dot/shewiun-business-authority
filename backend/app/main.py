@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from .db import Base, engine, get_db
 from .models import AuthorityGrant, AuthorizationDecision, BusinessResource, Delegation, Organization, Payment, Principal
 from .schemas import AuthorizationRequest, DecisionResponse, GraphEdge, GraphNode, PaymentRequest, PaymentResponse
-from .services.authorization import evaluate_and_record
+from .services.authorization import evaluate_and_record, verify_audit_chain
 
 app = FastAPI(
     title="SHEWIUN | Business Authority",
@@ -106,3 +106,10 @@ def security_events(organization_id: str, limit: int = 50, db: Session = Depends
              "aktion": r.action, "entscheidung": r.decision, "grund": r.reason_code,
              "ressource": r.resource_id, "betrag": str(r.requested_amount) if r.requested_amount is not None else None,
              "policy_version": r.policy_version, "delegationspfad": r.delegation_path} for r in rows]
+
+
+@app.get("/api/v1/audit/integritaet")
+def audit_integrity(organization_id: str, db: Session = Depends(get_db)):
+    if not db.get(Organization, organization_id):
+        raise HTTPException(status_code=404, detail="Mandant nicht gefunden.")
+    return verify_audit_chain(db, organization_id)
