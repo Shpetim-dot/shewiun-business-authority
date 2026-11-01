@@ -10,10 +10,11 @@ async function proxy(request: NextRequest, context: RouteContext) {
     return NextResponse.json({ code: "API_PROXY_NOT_CONFIGURED" }, { status: 503 });
   }
 
-  const { path = [] } = await context.params;
-  const endpoint = path[0] === "health" ? "/health" : \`/api/\${path.join("/")}\`;
+  const params = await context.params;
+  const path = params.path || [];
+  const endpoint = path[0] === "health" ? "/health" : "/api/" + path.join("/");
   const normalizedBase = base.endsWith("/") ? base.slice(0, -1) : base;
-  const target = new URL(\`\${endpoint}\${request.nextUrl.search}\`, \`\${normalizedBase}/\`);
+  const target = new URL(normalizedBase + endpoint + request.nextUrl.search);
 
   const headers = new Headers();
   headers.set("x-shewiun-api-key", secret);
@@ -23,7 +24,7 @@ async function proxy(request: NextRequest, context: RouteContext) {
   const correlationId = request.headers.get("x-correlation-id");
   if (correlationId) headers.set("x-correlation-id", correlationId);
 
-  const hasBody = !["GET", "HEAD"].includes(request.method);
+  const hasBody = request.method !== "GET" && request.method !== "HEAD";
   const response = await fetch(target, {
     method: request.method,
     headers,
