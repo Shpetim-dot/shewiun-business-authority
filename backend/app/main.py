@@ -1,10 +1,14 @@
 from decimal import Decimal
+import secrets
 from uuid import uuid4
 from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-from .db import Base, engine, get_db
+from .db import Base, SessionLocal, engine, get_db
+from .settings import settings
+from .demo_data import ensure_demo_data
 from .models import AuthorityGrant, AuthorizationDecision, BusinessResource, Delegation, Organization, Payment, Principal
 from .schemas import AuthorizationRequest, DecisionResponse, GraphEdge, GraphNode, PaymentRequest, PaymentResponse
 from .services.authorization import evaluate_and_record, verify_audit_chain
@@ -18,13 +22,35 @@ app = FastAPI(
 app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
     allow_credentials=False, allow_methods=["GET", "POST"], allow_headers=["Content-Type", "X-Correlation-ID"])
 
+@app.middleware("http")
+async def protect_machine_api(request, call_next):
+    # Öffentlicher Health-Ping enthält keine Mandanten- oder Geschäftsdaten.
+    if request.url.path == "/health":
+        return await call_next(request)
+    expected = settings.api_shared_secret
+    if not expected:
+        if settings.environment.lower() not in {"development", "test"}:
+            return JSONResponse(status_code=503, content={"code": "API_SECRET_NOT_CONFIGURED"})
+    elif not secrets.compare_digest(request.headers.get("x-shewiun-api-key", ""), expected):
+        return JSONResponse(status_code=401, content={"code": "MACHINE_AUTHENTICATION_REQUIRED"})
+    return await call_next(request)
+
 @app.on_event("startup")
 def startup() -> None:
     Base.metadata.create_all(bind=engine)
+    if settings.demo_seed_enabled:
+        with SessionLocal() as db:
+            ensure_demo_data(db)
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "produkt": "SHEWIUN", "version": "0.1.0"}
+    return {
+        "status": "ok",
+        "produkt": "SHEWIUN",
+        "version": "0.2.0",
+        "speicher": settings.storage_mode,
+        "persistenz_hinweis": "Dauerhaft" if settings.storage_mode == "postgresql" else "Flüchtiger Demo-Speicher je Function-Instanz",
+    }
 
 @app.get("/api/v1/autoritaetsgraph")
 def authority_graph(organization_id: str = Query(min_length=1, max_length=80), db: Session = Depends(get_db)):
