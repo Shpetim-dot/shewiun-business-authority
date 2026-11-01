@@ -8,12 +8,15 @@ from ..models import AuthorityGrant, AuthorizationDecision, BusinessResource, De
 
 POLICY_VERSION = "SHEWIUN-BA-0.1.0"
 
+def _utc(value: datetime) -> datetime:
+    return value.replace(tzinfo=timezone.utc) if value.tzinfo is None else value.astimezone(timezone.utc)
+
 def _layer_from_grant(grant: AuthorityGrant) -> AuthorityLayer:
     return AuthorityLayer(
         id=grant.id, principal_id=grant.principal_id, actions=frozenset(grant.actions),
         resource_id=grant.resource_id, max_amount=Decimal(grant.max_amount) if grant.max_amount is not None else None,
-        currency=grant.currency, can_delegate=grant.can_delegate, valid_from=grant.valid_from,
-        valid_until=grant.valid_until, revoked_at=grant.revoked_at,
+        currency=grant.currency, can_delegate=grant.can_delegate, valid_from=_utc(grant.valid_from),
+        valid_until=_utc(grant.valid_until) if grant.valid_until else None, revoked_at=_utc(grant.revoked_at) if grant.revoked_at else None,
     )
 
 def _layer_from_delegation(item: Delegation) -> AuthorityLayer:
@@ -21,8 +24,8 @@ def _layer_from_delegation(item: Delegation) -> AuthorityLayer:
         id=item.id, principal_id=item.delegate_id, delegator_id=item.delegator_id,
         actions=frozenset(item.actions), resource_id=item.resource_id,
         max_amount=Decimal(item.max_amount) if item.max_amount is not None else None,
-        currency=item.currency, can_delegate=item.can_subdelegate, valid_from=item.valid_from,
-        valid_until=item.valid_until, revoked_at=item.revoked_at,
+        currency=item.currency, can_delegate=item.can_subdelegate, valid_from=_utc(item.valid_from),
+        valid_until=_utc(item.valid_until) if item.valid_until else None, revoked_at=_utc(item.revoked_at) if item.revoked_at else None,
     )
 
 def evaluate_and_record(db: Session, *, organization_id: str, agent_id: str, acting_for_id: str,
@@ -44,7 +47,7 @@ def evaluate_and_record(db: Session, *, organization_id: str, agent_id: str, act
     resource = db.get(BusinessResource, resource_id)
     if not org or not agent or not human or not resource:
         reason = "IDENTITAET_ODER_RESSOURCE_UNBEKANNT"
-    elif any(p.organization_id != organization_id or p.status != "ACTIVE" for p in (agent, human)) or resource.organization_id != organization_id:
+    elif any(p.organization_id != organization_id or p.status != "ACTIVE" for p in (agent, human)) or resource.organization_id != organization_id or resource.status != "ACTIVE":
         reason = "MANDANTEN_ODER_STATUSPRUEFUNG_FEHLGESCHLAGEN"
     elif agent.kind != "AGENT" or human.kind != "HUMAN":
         reason = "PRINCIPAL_TYP_UNGUELTIG"
@@ -56,7 +59,7 @@ def evaluate_and_record(db: Session, *, organization_id: str, agent_id: str, act
             AuthorityGrant.revoked_at.is_(None),
         )).all()
         # Eindeutige, aktive Ursprungsberechtigung: Mehrdeutigkeit wird nicht geraten.
-        candidates = [g for g in grants if g.valid_from <= now and (g.valid_until is None or now < g.valid_until)]
+        candidates = [g for g in grants if _utc(g.valid_from) <= now and (g.valid_until is None or now < _utc(g.valid_until))]
         if len(candidates) == 1:
             grant = candidates[0]
             grant_id = grant.id
@@ -82,9 +85,7 @@ def evaluate_and_record(db: Session, *, organization_id: str, agent_id: str, act
                     seen.add(parent.id)
                     cursor = parent
                 chain = list(reversed(reverse_path))
-                if valid_chain and chain and chain[0].delegator_id is None and chain[0].delegator_id != acting_for_id:
-                    # Erste Delegation muss unmittelbar aus der Ursprungs-Vollmacht stammen.
-                    valid_chain = chain[0].delegator_id == acting_for_id
+                # Die erste Delegation muss unmittelbar vom Inhaber der Ursprungsvollmacht kommen.
                 if valid_chain and chain and chain[0].delegator_id == acting_for_id:
                     layers = [_layer_from_delegation(d) for d in chain]
                     result = calculate_effective_authority(
