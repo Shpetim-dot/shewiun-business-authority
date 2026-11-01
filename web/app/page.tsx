@@ -45,24 +45,28 @@ export default function Home() {
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<{ ok: boolean; text: string } | null>(null);
   const [payments, setPayments] = useState(0);
+  const [auditIntegrity, setAuditIntegrity] = useState<boolean | null>(null);
 
   async function loadData() {
     try {
-      const [health, graph, audit, paymentRows] = await Promise.all([
+      const [health, graph, audit, paymentRows, integrity] = await Promise.all([
         fetch(`${API_BASE}/health`, { cache: "no-store" }),
         fetch(`${API_BASE}/api/v1/autoritaetsgraph?organization_id=${API_ORG}`, { cache: "no-store" }),
         fetch(`${API_BASE}/api/v1/sicherheitsereignisse?organization_id=${API_ORG}`, { cache: "no-store" }),
         fetch(`${API_BASE}/api/v1/sandbox/zahlungen?organization_id=${API_ORG}`, { cache: "no-store" }),
+        fetch(`${API_BASE}/api/v1/audit/integritaet?organization_id=${API_ORG}`, { cache: "no-store" }),
       ]);
-      if (!health.ok || !graph.ok || !audit.ok || !paymentRows.ok) throw new Error("Backend nicht erreichbar");
+      if (!health.ok || !graph.ok || !audit.ok || !paymentRows.ok || !integrity.ok) throw new Error("Backend nicht erreichbar");
       const graphData = await graph.json();
       setNodes(graphData.knoten || []);
       setEdges(graphData.verbindungen || []);
       setEvents(await audit.json());
       setPayments((await paymentRows.json()).length);
+      setAuditIntegrity(Boolean((await integrity.json()).gueltig));
       setApiState("verbunden");
     } catch {
       setApiState("getrennt");
+      setAuditIntegrity(null);
     }
   }
 
@@ -171,7 +175,7 @@ export default function Home() {
               {result && <div className={result.ok ? "result-box result-good" : "result-box result-bad"}><span>{result.ok ? "✓" : "!"}</span><div><strong>{result.ok ? "Aktion autorisiert" : "Aktion verweigert"}</strong><p>{result.text}</p></div></div>}
             </section>
 
-            <section className="panel events-panel"><div className="panel-header"><div><div className="panel-kicker">NACHVOLLZIEHBARKEIT</div><h2>Letzte Autorisierungsentscheidungen</h2></div><button className="text-button" onClick={() => setSection("laufzeit")}>Alle Ereignisse <Icon name="arrow" /></button></div><EventTable events={events.slice(0, 5)} /></section>
+            <section className="panel events-panel"><div className="panel-header"><div><div className="panel-kicker">NACHVOLLZIEHBARKEIT</div><h2>Letzte Autorisierungsentscheidungen</h2></div><Badge tone={auditIntegrity === true ? "good" : auditIntegrity === false ? "bad" : "warn"}>{auditIntegrity === true ? "HASH-KETTE GÜLTIG" : auditIntegrity === false ? "HASH-KETTE FEHLERHAFT" : "INTEGRITÄT UNGEPRÜFT"}</Badge><button className="text-button" onClick={() => setSection("laufzeit")}>Alle Ereignisse <Icon name="arrow" /></button></div><EventTable events={events.slice(0, 5)} /></section>
           </>}
 
           {section === "graph" && <section className="panel graph-full"><div className="panel-header"><div><div className="panel-kicker">BUSINESS AUTHORITY GRAPH</div><h2>Autoritätsbeziehungen</h2><p>Die Darstellung basiert auf den im Backend gespeicherten Vollmachten und Delegationen.</p></div><Badge tone="good">BACKEND-DATEN</Badge></div><AuthorityGraph nodes={nodes} edges={edges} large /><div className="graph-legend"><span><i className="legend-human" />Mensch</span><span><i className="legend-agent" />KI-Agent</span><span><i className="legend-resource" />Ressource</span><span><i className="legend-line" />Vollmacht / Delegation</span></div><div className="graph-table"><h3>Beziehungen im Graph</h3><table><thead><tr><th>Typ</th><th>Von</th><th>Nach</th><th>Limit</th></tr></thead><tbody>{edges.map(e=><tr key={e.id}><td>{e.typ}</td><td>{e.von}</td><td>{e.nach}</td><td>{money(e.limit)}</td></tr>)}</tbody></table></div></section>}
@@ -184,7 +188,7 @@ export default function Home() {
 
           {section === "nachweise" && <section className="panel"><div className="panel-header"><div><div className="panel-kicker">AUDIT EVIDENCE</div><h2>Autorisierungsnachweise</h2><p>Gespeicherte Entscheidungen mit Policy-Version, Delegationspfad und Entscheidungsgrund.</p></div></div><EventTable events={events} /></section>}
 
-          {section === "system" && <section className="panel"><div className="panel-header"><div><div className="panel-kicker">SYSTEMSTATUS</div><h2>Integrationsstatus</h2><p>Technische Umgebung und aktuelle Schnittstellen.</p></div></div><div className="system-list"><div><span>Autorisierungs-API</span><Badge tone={apiState === "verbunden" ? "good" : "bad"}>{apiState === "verbunden" ? "Erreichbar" : "Nicht erreichbar"}</Badge></div><div><span>PostgreSQL</span><Badge tone={apiState === "verbunden" ? "good" : "warn"}>{apiState === "verbunden" ? "Über API verbunden" : "Status unbekannt"}</Badge></div><div><span>Sandbox-Zahlungen</span><Badge tone="good">{payments} Datensätze</Badge></div><div><span>Policy-Version</span><code>SHEWIUN-BA-0.1.0</code></div><div><span>Authentifizierung</span><Badge tone="warn">Demo-Modus · keine OIDC-Prüfung</Badge></div></div></section>}
+          {section === "system" && <section className="panel"><div className="panel-header"><div><div className="panel-kicker">SYSTEMSTATUS</div><h2>Integrationsstatus</h2><p>Technische Umgebung und aktuelle Schnittstellen.</p></div></div><div className="system-list"><div><span>Autorisierungs-API</span><Badge tone={apiState === "verbunden" ? "good" : "bad"}>{apiState === "verbunden" ? "Erreichbar" : "Nicht erreichbar"}</Badge></div><div><span>PostgreSQL</span><Badge tone={apiState === "verbunden" ? "good" : "warn"}>{apiState === "verbunden" ? "Über API verbunden" : "Status unbekannt"}</Badge></div><div><span>Sandbox-Zahlungen</span><Badge tone="good">{payments} Datensätze</Badge></div><div><span>Policy-Version</span><code>SHEWIUN-BA-0.1.0</code></div><div><span>Audit-Integrität</span><Badge tone={auditIntegrity === true ? "good" : auditIntegrity === false ? "bad" : "warn"}>{auditIntegrity === true ? "Hash-Kette gültig" : auditIntegrity === false ? "Prüfung fehlgeschlagen" : "Nicht geprüft"}</Badge></div><div><span>Authentifizierung</span><Badge tone="warn">Demo-Modus · keine OIDC-Prüfung</Badge></div></div></section>}
           <footer className="page-footer"><span>SHEWIUN BUSINESS AUTHORITY</span><span>Technischer Demonstrator · Keine Produktionsfreigabe</span><span>© 2026 SHEWIUN</span></footer>
         </div>
       </main>
@@ -208,7 +212,7 @@ function AuthorityGraph({ nodes, edges, large = false }: { nodes: GraphNode[]; e
       const a = present.find(n => n.id === e.von), b = present.find(n => n.id === e.nach);
       if (!a || !b) return null;
       const x1 = a.x + a.width, y1 = a.y + 35, x2 = b.x, y2 = b.y + 35;
-      return <g key={e.id}><path className={e.typ === "DELEGATION" ? "edge-delegation" : "edge-grant"} d={`M ${x1} ${y1} C ${(x1+x2)/2} ${y1}, ${(x1+x2)/2} ${y2}, ${x2} ${y2}`} /><text x={(x1+x2)/2} y={(y1+y2)/2-9} className="edge-label">{e.typ === "DELEGATION" ? "DELEGATION" : "VOLLMACHT"}</text></g>;
+      return <g key={e.id}><path className={e.typ === "DELEGATION" || e.typ === "DELEGIERTER_ZUGRIFF" ? "edge-delegation" : "edge-grant"} d={`M ${x1} ${y1} C ${(x1+x2)/2} ${y1}, ${(x1+x2)/2} ${y2}, ${x2} ${y2}`} /><text x={(x1+x2)/2} y={(y1+y2)/2-9} className="edge-label">{e.typ === "DELEGATION" ? "DELEGATION" : e.typ === "DELEGIERTER_ZUGRIFF" ? "AGENTENZUGRIFF" : "VOLLMACHT"}</text></g>;
     })}
     {present.map(n => <g key={n.id} transform={`translate(${n.x},${n.y})`}><rect width={n.width} height="70" rx="5" className={`node node-${n.type}`} /><circle cx="17" cy="18" r="4" className="node-indicator" /><text x="30" y="23" className="node-title">{n.title}</text><text x="16" y="48" className="node-sub">{n.sub}</text></g>)}
   </svg></div>;
