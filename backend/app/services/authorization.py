@@ -150,3 +150,23 @@ def evaluate_and_record(db: Session, *, organization_id: str, agent_id: str, act
     return {"decision_id": decision_id, "allowed": allowed, "reason_code": reason,
             "effective_limit": effective_limit, "delegation_path": path,
             "policy_version": POLICY_VERSION, "correlation_id": correlation_id}
+
+
+def verify_audit_chain(db: Session, organization_id: str) -> dict:
+    """Prüft Sequenz, Vorgängerbezug und SHA-256-Verkettung der Ereignisse."""
+    events = db.scalars(select(AuditEvent).where(AuditEvent.organization_id == organization_id)
+        .order_by(AuditEvent.sequence.asc())).all()
+    previous_hash = "0" * 64
+    expected_sequence = 1
+    for event in events:
+        canonical = json.dumps(event.payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+        expected_hash = hashlib.sha256(
+            f"{previous_hash}|{expected_sequence}|{canonical}".encode("utf-8")
+        ).hexdigest()
+        if event.sequence != expected_sequence:
+            return {"gueltig": False, "ereignisse": len(events), "fehler": "SEQUENZLUECKE", "fehler_ereignis": event.id}
+        if event.previous_hash != previous_hash or event.event_hash != expected_hash:
+            return {"gueltig": False, "ereignisse": len(events), "fehler": "HASH_KETTE_UNGUELTIG", "fehler_ereignis": event.id}
+        previous_hash = event.event_hash
+        expected_sequence += 1
+    return {"gueltig": True, "ereignisse": len(events), "letzter_hash": previous_hash, "fehler": None}
