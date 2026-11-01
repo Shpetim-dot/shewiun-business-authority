@@ -1,0 +1,31 @@
+services:
+  datenbank:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: shewiun
+      POSTGRES_USER: shewiun
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-shewiun-local-only}
+    ports:
+      - "5433:5432"
+    volumes:
+      - shewiun_postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U shewiun -d shewiun"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build:
+      context: ./backend
+    environment:
+      DATABASE_URL: postgresql+psycopg://shewiun:${POSTGRES_PASSWORD:-shewiun-local-only}@datenbank:5432/shewiun
+      ENVIRONMENT: development
+    ports:
+      - "8000:8000"
+    depends_on:
+      datenbank:
+        condition: service_healthy
+
+volumes:
+  shewiun_postgres:
