@@ -6,7 +6,7 @@ from sqlalchemy.pool import StaticPool
 
 from app.db import Base
 from app.models import AuthorityGrant, AuthorizationDecision, BusinessResource, Delegation, Organization, Principal
-from app.services.authorization import evaluate_and_record
+from app.services.authorization import evaluate_and_record, verify_audit_chain
 
 def make_session():
     engine = create_engine("sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool)
@@ -42,6 +42,7 @@ def test_authorized_payment_within_effective_limit():
     assert result["effective_limit"] == Decimal("10000")
     assert len(result["delegation_path"]) == 2
     assert db.scalar(select(AuthorizationDecision).where(AuthorizationDecision.id == result["decision_id"])).decision == "ALLOW"
+    assert verify_audit_chain(db, "org-1")["gueltig"] is True
     db.close()
 
 def test_amount_above_delegated_limit_is_denied_and_recorded():
@@ -54,6 +55,7 @@ def test_amount_above_delegated_limit_is_denied_and_recorded():
     assert result["reason_code"] == "DELEGIERTES_LIMIT_UEBERSCHRITTEN"
     row = db.scalar(select(AuthorizationDecision).where(AuthorizationDecision.id == result["decision_id"]))
     assert row.decision == "DENY"
+    assert verify_audit_chain(db, "org-1")["gueltig"] is True
     db.close()
 
 def test_agent_cannot_use_action_not_in_delegation():
