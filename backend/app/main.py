@@ -61,8 +61,7 @@ def authorize(request: AuthorizationRequest, db: Session = Depends(get_db)):
 def effective_authority(agent_id: str, organization_id: str, acting_for_id: str, resource_id: str, db: Session = Depends(get_db)):
     # Die Anzeige verwendet dieselbe Entscheidungslogik wie der Enforcement-Pfad.
     result = evaluate_and_record(db, organization_id=organization_id, agent_id=agent_id,
-        acting_for_id=acting_for_id, resource_id=resource_id, action="payment.create")
-    db.commit()
+        acting_for_id=acting_for_id, resource_id=resource_id, action="payment.create", record_decision=False)
     return {"agent_id": agent_id, "ressource": resource_id, "entscheidung": "ERLAUBT" if result["allowed"] else "VERWEIGERT",
             "effektives_limit": result["effective_limit"], "delegationspfad": result["delegation_path"],
             "grund": result["reason_code"], "policy_version": result["policy_version"]}
