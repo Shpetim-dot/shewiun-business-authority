@@ -3,8 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 
-type GraphNode = { id: string; label: string; typ: string; status: string };
-type GraphEdge = { id: string; von: string; nach: string; typ: string; limit?: number | null };
+type GraphNode = { id: string; label: string; typ: string; status: string; beschreibung?: string | null };
+type GraphEdge = { id: string; von: string; nach: string; typ: string; limit?: number | null; waehrung?: string | null; aktionen?: string[]; delegierbar?: boolean | null; gueltig_bis?: string | null; beschreibung?: string | null };
 type EventItem = { id: string; zeitpunkt: string; agent: string; aktion: string; entscheidung: string; grund: string; betrag?: string | null };
 type ApiState = "pruefung" | "verbunden" | "getrennt";
 
@@ -47,6 +47,7 @@ export default function Home() {
   const [payments, setPayments] = useState(0);
   const [effectiveLimit, setEffectiveLimit] = useState<number | null>(null);
   const [auditIntegrity, setAuditIntegrity] = useState<boolean | null>(null);
+  const [storageMode, setStorageMode] = useState("Nicht geprüft");
 
   async function loadData() {
     try {
@@ -59,6 +60,8 @@ export default function Home() {
         fetch(`${API_BASE}/v1/agenten/${AGENT}/effektive-berechtigungen?organization_id=${API_ORG}&acting_for_id=${CFO}&resource_id=${ACCOUNT}`, { cache: "no-store" }),
       ]);
       if (!health.ok || !graph.ok || !audit.ok || !paymentRows.ok || !integrity.ok || !authority.ok) throw new Error("Backend nicht erreichbar");
+      const healthData = await health.json();
+      setStorageMode(healthData.speicher === "postgresql" ? "PostgreSQL · dauerhaft" : "SQLite-Demo · flüchtig");
       const graphData = await graph.json();
       setNodes(graphData.knoten || []);
       setEdges(graphData.verbindungen || []);
@@ -121,7 +124,6 @@ export default function Home() {
     <div className="shell">
       <aside className="sidebar">
         <div className="brand">
-          <div className="brand-mark"><span /></div>
           <div><div className="brand-name">SHEWIUN</div><div className="brand-sub">GESCHÄFTLICHE AUTORITÄT</div></div>
         </div>
         <div className="tenant-switch"><span className="tenant-icon">A</span><div><small>MANDANT</small><strong>Alpenbank Demo AG</strong></div><span className="chevron">⌄</span></div>
@@ -139,7 +141,7 @@ export default function Home() {
       <main className="main">
         <header className="topbar">
           <div className="breadcrumb">SHEWIUN <span>/</span> {title().toUpperCase()}</div>
-          <div className="topbar-right"><Badge tone={apiState === "verbunden" ? "good" : apiState === "getrennt" ? "bad" : "warn"}>{apiState === "verbunden" ? "BACKEND VERBUNDEN" : apiState === "getrennt" ? "BACKEND GETRENNT" : "VERBINDUNG WIRD GEPRÜFT"}</Badge><div className="user-chip"><span>SM</span><div><strong>Systemadministration</strong><small>Demo-Zugriff</small></div></div></div>
+          <div className="topbar-right"><Badge tone={apiState === "verbunden" ? "good" : apiState === "getrennt" ? "bad" : "warn"}>{apiState === "verbunden" ? "API VERBUNDEN" : apiState === "getrennt" ? "BACKEND GETRENNT" : "VERBINDUNG WIRD GEPRÜFT"}</Badge><div className="user-chip"><span>SM</span><div><strong>Systemadministration</strong><small>Demo-Zugriff</small></div></div></div>
         </header>
 
         <div className="content">
@@ -158,7 +160,7 @@ export default function Home() {
 
             <div className="section-grid">
               <section className="panel graph-panel">
-                <div className="panel-header"><div><div className="panel-kicker">AUTORITÄTSMODELL</div><h2>Geschäftliche Autorität</h2><p>Ursprungsvollmacht und daraus abgeleitete Agentenrechte</p></div><button className="text-button" onClick={() => setSection("graph")}>Graph öffnen <Icon name="arrow" /></button></div>
+                <div className="panel-header"><div><div className="panel-kicker">BUSINESS AUTHORITY GRAPH</div><h2>Geschäftliche Autorität</h2><p>Organisation → natürliche Personen → Agenten → geschützte Ressourcen</p></div><button className="text-button" onClick={() => setSection("graph")}>Graph öffnen <Icon name="arrow" /></button></div>
                 <AuthorityGraph nodes={nodes} edges={edges} />
                 <div className="graph-legend"><span><i className="legend-human" />Mensch</span><span><i className="legend-agent" />KI-Agent</span><span><i className="legend-resource" />Ressource</span><span><i className="legend-line" />Delegation / Vollmacht</span></div>
               </section>
@@ -169,6 +171,8 @@ export default function Home() {
                 <div className="authority-row"><span>Ressource</span><strong>Geschäftskonto ·•••• 1001</strong></div>
                 <div className="authority-row"><span>Erlaubte Aktion</span><strong><code>payment.create</code></strong></div>
                 <div className="authority-row"><span>Weiterdelegation</span><Badge tone="bad">NICHT ERLAUBT</Badge></div>
+                <div className="authority-row"><span>Technischer Aussteller</span><strong>shewiun-demo-issuer</strong></div>
+                <div className="authority-row"><span>Widerruf</span><Badge tone="good">AKTIV PRÜFBAR</Badge></div>
                 <div className="panel-footnote">Demo-Konfiguration · Effektives Limit wird serverseitig aus der Berechtigungskette berechnet.</div>
               </section>
             </div>
@@ -177,6 +181,16 @@ export default function Home() {
               <div className="panel-header"><div><div className="panel-kicker">LAUFZEIT-DURCHSETZUNG · TESTUMGEBUNG</div><h2>Autorisierung praktisch prüfen</h2><p>Die Aktion wird durch die API geprüft. Nur eine erlaubte Aktion erzeugt einen Zahlungsdatensatz.</p></div><Badge tone="warn">SYNTHETISCHE DATEN</Badge></div>
               <div className="test-actions"><div className="test-case"><div><strong>Reguläre Zahlung</strong><small>CHF 5.000 · innerhalb der delegierten Vollmacht</small></div><button disabled={busy || apiState !== "verbunden"} className="button button-primary" onClick={() => runPayment(5000)}>Zahlung ausführen <Icon name="arrow" /></button></div><div className="test-case"><div><strong>Limitüberschreitung</strong><small>CHF 15.000 · oberhalb der delegierten Vollmacht</small></div><button disabled={busy || apiState !== "verbunden"} className="button button-danger" onClick={() => runPayment(15000)}>Verweigerung testen <Icon name="arrow" /></button></div></div>
               {result && <div className={result.ok ? "result-box result-good" : "result-box result-bad"}><span>{result.ok ? "✓" : "!"}</span><div><strong>{result.ok ? "Aktion autorisiert" : "Aktion verweigert"}</strong><p>{result.text}</p></div></div>}
+            </section>
+
+            <section className="panel differentiation-panel">
+              <div className="panel-header"><div><div className="panel-kicker">PRODUKTGRENZE</div><h2>Agenten ausführen lassen. Geschäftliche Autorität separat kontrollieren.</h2><p>SHEWIUN ersetzt kein Agenten-Framework. Es ergänzt es um ein eigenständiges, deterministisches Autoritäts- und Durchsetzungsmodell.</p></div></div>
+              <div className="differentiation-grid">
+                <div><span className="diff-number">01</span><strong>Vollmacht verstehen</strong><p>Menschen, Rechtsträger, Ressourcen und geschäftliche Mandate als zusammenhängenden Autoritätsgraph modellieren.</p></div>
+                <div><span className="diff-number">02</span><strong>Delegation begrenzen</strong><p>Agenten erhalten nur ausdrücklich delegierte Teilrechte. Limits, Aktionen, Gültigkeit und Weiterdelegation werden je Stufe reduziert.</p></div>
+                <div><span className="diff-number">03</span><strong>Vor Mutation entscheiden</strong><p>Eine unabhängige Policy-Entscheidung prüft die konkrete Aktion serverseitig, bevor die geschützte Geschäfts-API Daten verändert.</p></div>
+              </div>
+              <div className="integration-flow"><div><small>01 · AGENTEN-RUNTIME</small><strong>Aktion anfordern</strong><span>Identität · Auftrag · Ressource · Parameter</span></div><b>→</b><div><small>02 · SHEWIUN PDP</small><strong>Autorität berechnen</strong><span>Vollmacht · Delegation · Richtlinie · Kontext</span></div><b>→</b><div><small>03 · ENFORCEMENT</small><strong>ALLOW / DENY</strong><span>Geschützte API nur nach positiver Entscheidung</span></div><b>→</b><div><small>04 · EVIDENCE</small><strong>Nachweis sichern</strong><span>Entscheidungs-ID · Policy-Version · Hash-Kette</span></div></div>
             </section>
 
             <section className="panel events-panel"><div className="panel-header"><div><div className="panel-kicker">NACHVOLLZIEHBARKEIT</div><h2>Letzte Autorisierungsentscheidungen</h2></div><Badge tone={auditIntegrity === true ? "good" : auditIntegrity === false ? "bad" : "warn"}>{auditIntegrity === true ? "HASH-KETTE GÜLTIG" : auditIntegrity === false ? "HASH-KETTE FEHLERHAFT" : "INTEGRITÄT UNGEPRÜFT"}</Badge><button className="text-button" onClick={() => setSection("laufzeit")}>Alle Ereignisse <Icon name="arrow" /></button></div><EventTable events={events.slice(0, 5)} /></section>
@@ -192,7 +206,8 @@ export default function Home() {
 
           {section === "nachweise" && <section className="panel"><div className="panel-header"><div><div className="panel-kicker">PRÜFNACHWEISE</div><h2>Autorisierungsnachweise</h2><p>Gespeicherte Entscheidungen mit Policy-Version, Delegationspfad und Entscheidungsgrund.</p></div></div><EventTable events={events} /></section>}
 
-          {section === "system" && <section className="panel"><div className="panel-header"><div><div className="panel-kicker">SYSTEMSTATUS</div><h2>Integrationsstatus</h2><p>Technische Umgebung und aktuelle Schnittstellen.</p></div></div><div className="system-list"><div><span>Autorisierungs-API</span><Badge tone={apiState === "verbunden" ? "good" : "bad"}>{apiState === "verbunden" ? "Erreichbar" : "Nicht erreichbar"}</Badge></div><div><span>PostgreSQL</span><Badge tone={apiState === "verbunden" ? "good" : "warn"}>{apiState === "verbunden" ? "Über API verbunden" : "Status unbekannt"}</Badge></div><div><span>Sandbox-Zahlungen</span><Badge tone="good">{payments} Datensätze</Badge></div><div><span>Policy-Version</span><code>SHEWIUN-BA-0.1.0</code></div><div><span>Audit-Integrität</span><Badge tone={auditIntegrity === true ? "good" : auditIntegrity === false ? "bad" : "warn"}>{auditIntegrity === true ? "Hash-Kette gültig" : auditIntegrity === false ? "Prüfung fehlgeschlagen" : "Nicht geprüft"}</Badge></div><div><span>Authentifizierung</span><Badge tone="warn">Demo-Modus · keine OIDC-Prüfung</Badge></div></div></section>}
+          {section === "system" && <section className="panel"><div className="panel-header"><div><div className="panel-kicker">SYSTEMSTATUS</div><h2>Integrationsstatus</h2><p>Technische Umgebung und aktuelle Schnittstellen.</p></div></div><div className="system-list"><div><span>Autorisierungs-API</span><Badge tone={apiState === "verbunden" ? "good" : "bad"}>{apiState === "verbunden" ? "Erreichbar" : "Nicht erreichbar"}</Badge></div><div><span>Datenhaltung</span><Badge tone={storageMode.startsWith("PostgreSQL") ? "good" : "warn"}>{storageMode}</Badge></div><div><span>Sandbox-Zahlungen</span><Badge tone="good">{payments} Datensätze</Badge></div><div><span>Policy-Version</span><code>SHEWIUN-BA-0.1.0</code></div><div><span>Audit-Integrität</span><Badge tone={auditIntegrity === true ? "good" : auditIntegrity === false ? "bad" : "warn"}>{auditIntegrity === true ? "Hash-Kette gültig" : auditIntegrity === false ? "Prüfung fehlgeschlagen" : "Nicht geprüft"}</Badge></div><div><span>Service-zu-Service</span><Badge tone={apiState === "verbunden" ? "good" : "warn"}>{apiState === "verbunden" ? "Geschützter Server-Proxy" : "Nicht verbunden"}</Badge></div>
+          <div><span>Identitätsprüfung im Auftrag</span><Badge tone="warn">OIDC / Workload Identity als nächster Ausbauschritt</Badge></div></div></section>}
           <footer className="page-footer"><span>SHEWIUN GESCHÄFTLICHE AUTORITÄT</span><span>Technischer Demonstrator · Keine Produktionsfreigabe</span><span>© 2026 SHEWIUN</span></footer>
         </div>
       </main>
@@ -201,25 +216,100 @@ export default function Home() {
 }
 
 function AuthorityGraph({ nodes, edges, large = false }: { nodes: GraphNode[]; edges: GraphEdge[]; large?: boolean }) {
-  const known = [
-    { id: "person-cfo-anna", x: 105, y: 110, width: 190, type: "human", title: "Anna Müller", sub: "CFO · CHF 100.000" },
-    { id: "agent-payment-01", x: 420, y: 110, width: 190, type: "agent", title: "Zahlungsagent 01", sub: "Delegiert · CHF 10.000" },
-    { id: "konto-corporate-1001", x: 735, y: 110, width: 205, type: "resource", title: "Geschäftskonto", sub: "Konto ·•••• 1001" },
-    { id: "person-finance-peter", x: 105, y: 255, width: 190, type: "human", title: "Peter Meier", sub: "Finanzleitung · CHF 25.000" },
-    { id: "agent-sub-01", x: 420, y: 255, width: 190, type: "agent", title: "Unteragent 01", sub: "Keine Delegation" },
-    { id: "konto-corporate-2002", x: 735, y: 255, width: 205, type: "resource", title: "Geschäftskonto", sub: "Konto ·•••• 2002" },
-  ];
-  const present = known.filter(k => nodes.some(n => n.id === k.id));
-  const height = large ? 390 : 330;
-  return <div className={large ? "graph-canvas graph-canvas-large" : "graph-canvas"}><svg viewBox={`0 0 1000 ${height}`} role="img" aria-label="Darstellung der geschäftlichen Vollmachten und Agentendelegationen">
-    {edges.map(e => {
-      const a = present.find(n => n.id === e.von), b = present.find(n => n.id === e.nach);
-      if (!a || !b) return null;
-      const x1 = a.x + a.width, y1 = a.y + 35, x2 = b.x, y2 = b.y + 35;
-      return <g key={e.id}><path className={e.typ === "DELEGATION" || e.typ === "DELEGIERTER_ZUGRIFF" ? "edge-delegation" : "edge-grant"} d={`M ${x1} ${y1} C ${(x1+x2)/2} ${y1}, ${(x1+x2)/2} ${y2}, ${x2} ${y2}`} /><text x={(x1+x2)/2} y={(y1+y2)/2-9} className="edge-label">{e.typ === "DELEGATION" ? "DELEGATION" : e.typ === "DELEGIERTER_ZUGRIFF" ? "AGENTENZUGRIFF" : "VOLLMACHT"}</text></g>;
-    })}
-    {present.map(n => <g key={n.id} transform={`translate(${n.x},${n.y})`}><rect width={n.width} height="70" rx="5" className={`node node-${n.type}`} /><circle cx="17" cy="18" r="4" className="node-indicator" /><text x="30" y="23" className="node-title">{n.title}</text><text x="16" y="48" className="node-sub">{n.sub}</text></g>)}
-  </svg></div>;
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const organization = nodes.find(n => n.typ === "ORGANISATION");
+  const humans = nodes.filter(n => n.typ === "MENSCH");
+  const agents = nodes.filter(n => n.typ === "KI_AGENT");
+  const resources = nodes.filter(n => n.typ === "RESSOURCE");
+  const width = 1120;
+  const cardWidth = 238;
+  const cardHeight = 76;
+  const top = 150;
+  const rowStep = 112;
+  const rows = Math.max(1, humans.length, agents.length, resources.length);
+  const height = Math.max(360, top + rows * rowStep + 34);
+  const layout = new Map<string, { x: number; y: number; w: number; h: number; type: string }>();
+  if (organization) layout.set(organization.id, { x: 440, y: 22, w: 240, h: 72, type: "org" });
+  humans.forEach((n, i) => layout.set(n.id, { x: 28, y: top + i * rowStep, w: cardWidth, h: cardHeight, type: "human" }));
+  agents.forEach((n, i) => layout.set(n.id, { x: 440, y: top + i * rowStep, w: cardWidth, h: cardHeight, type: "agent" }));
+  resources.forEach((n, i) => layout.set(n.id, { x: 854, y: top + i * rowStep, w: cardWidth, h: cardHeight, type: "resource" }));
+  const selected = nodes.find(n => n.id === selectedId) || nodes.find(n => n.typ === "KI_AGENT") || nodes[0];
+  const connected = selected ? edges.filter(e => e.von === selected.id || e.nach === selected.id) : [];
+  const typeLabel: Record<string, string> = {
+    ORGANISATIONSZUGEHOERIGKEIT: "ORGANISATION",
+    ORGANISATIONSRESSOURCE: "ORGANISATION",
+    VOLLMACHT: "URSPRUNGS-VOLLMACHT",
+    DELEGATION: "DELEGATION",
+    DELEGIERTER_ZUGRIFF: "AGENTENZUGRIFF",
+  };
+
+  return <div className={large ? "authority-graph-wrap large" : "authority-graph-wrap"}>
+    <div className="graph-canvas">
+      <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label="Dynamischer Graph der geschäftlichen Vollmachten und Delegationen">
+        <text x="147" y="130" className="graph-column-label">MENSCHEN</text>
+        <text x="559" y="130" className="graph-column-label">KI-AGENTEN</text>
+        <text x="973" y="130" className="graph-column-label">RESSOURCEN</text>
+        {edges.map(edge => {
+          const from = layout.get(edge.von), to = layout.get(edge.nach);
+          if (!from || !to) return null;
+          let x1: number, y1: number, x2: number, y2: number;
+          if (edge.typ === "ORGANISATIONSZUGEHOERIGKEIT" || edge.typ === "ORGANISATIONSRESSOURCE") {
+            x1 = from.x + from.w / 2; y1 = from.y + from.h;
+            x2 = to.x + to.w / 2; y2 = to.y;
+          } else {
+            const forward = to.x >= from.x;
+            x1 = forward ? from.x + from.w : from.x;
+            y1 = from.y + from.h / 2;
+            x2 = forward ? to.x : to.x + to.w;
+            y2 = to.y + to.h / 2;
+          }
+          const bend = Math.max(26, Math.abs(x2 - x1) * .38);
+          const curve = edge.typ.startsWith("ORGANISATION") 
+            ? `M ${x1} ${y1} C ${x1} ${y1 + 35}, ${x2} ${y2 - 35}, ${x2} ${y2}`
+            : `M ${x1} ${y1} C ${x1 + (x2 >= x1 ? bend : -bend)} ${y1}, ${x2 - (x2 >= x1 ? bend : -bend)} ${y2}, ${x2} ${y2}`;
+          const active = selected && (edge.von === selected.id || edge.nach === selected.id);
+          return <g key={edge.id} className={active ? "graph-edge selected" : "graph-edge"}>
+            <path className={edge.typ.startsWith("ORGANISATION") ? "edge-tenant" : edge.typ === "DELEGATION" || edge.typ === "DELEGIERTER_ZUGRIFF" ? "edge-delegation" : "edge-grant"} d={curve} />
+            {!edge.typ.startsWith("ORGANISATION") && <text x={(x1+x2)/2} y={(y1+y2)/2-8} className="edge-label">{typeLabel[edge.typ] || edge.typ}</text>}
+          </g>;
+        })}
+        {organization && (() => { const p=layout.get(organization.id)!; return <g transform={`translate(${p.x},${p.y})`}>
+          <rect width={p.w} height={p.h} rx="5" className="node node-org" />
+          <text x="15" y="24" className="node-org-kicker">RECHTSTRÄGER</text>
+          <text x="15" y="47" className="node-title">{organization.label}</text>
+          <text x="15" y="63" className="node-sub">{organization.beschreibung || "Organisation"}</text>
+        </g>; })()}
+        {nodes.filter(n => n.typ !== "ORGANISATION").map(node => {
+          const p=layout.get(node.id);
+          if (!p) return null;
+          const isSelected = selected?.id === node.id;
+          return <g key={node.id} transform={`translate(${p.x},${p.y})`} className="graph-node-group"
+            onClick={() => setSelectedId(node.id)} role="button" tabIndex={0}
+            onKeyDown={event => { if (event.key === "Enter" || event.key === " ") setSelectedId(node.id); }}
+            aria-label={`${node.label} auswählen`}>
+            <rect width={p.w} height={p.h} rx="5" className={`node node-${p.type} ${isSelected ? "node-selected" : ""}`} />
+            <circle cx="17" cy="18" r="4" className={`node-indicator indicator-${p.type}`} />
+            <text x="30" y="23" className="node-title">{node.label}</text>
+            <text x="15" y="47" className="node-sub">{node.beschreibung || node.typ}</text>
+            <text x="15" y="64" className="node-state">{node.status}</text>
+          </g>;
+        })}
+      </svg>
+    </div>
+    <div className="graph-inspector">
+      <div><small>GEWÄHLTES OBJEKT</small><strong>{selected?.label || "Keine Daten geladen"}</strong><p>{selected?.beschreibung || "Wähle einen Knoten im Graphen aus."}</p></div>
+      <div className="inspector-relations"><small>VERKNÜPFTE AUTORITÄTEN</small><strong>{connected.length}</strong><p>{connected.map(edge => edge.typ.replaceAll("_"," ")).join(" · ") || "Keine Verbindungen"}</p></div>
+    </div>
+    <div className="graph-edge-list">
+      <div className="graph-edge-list-head"><strong>Autorisierungsbeziehungen</strong><span>{edges.length} Beziehungen</span></div>
+      {edges.filter(edge => !edge.typ.startsWith("ORGANISATION")).map(edge => <div className="graph-edge-row" key={edge.id}>
+        <div><strong>{edge.typ.replaceAll("_"," ")}</strong><small>{nodes.find(n=>n.id===edge.von)?.label || edge.von} → {nodes.find(n=>n.id===edge.nach)?.label || edge.nach}</small></div>
+        <span>{edge.limit == null ? "ohne Limit" : money(edge.limit)} {edge.waehrung || ""}</span>
+        <small>{edge.aktionen?.join(" · ") || "Keine Aktionen hinterlegt"}</small>
+        <Badge tone={edge.delegierbar === false ? "bad" : edge.delegierbar ? "good" : "neutral"}>{edge.delegierbar === false ? "Keine Weiterdelegation" : edge.delegierbar ? "Weiterdelegierbar" : "Direkte Beziehung"}</Badge>
+      </div>)}
+    </div>
+  </div>;
 }
 
 function EventTable({ events }: { events: EventItem[] }) {
