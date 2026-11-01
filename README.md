@@ -16,7 +16,7 @@ SHEWIUN ersetzt weder ein Agenten-Framework noch ein IAM-System. Es ergänzt bes
 ## Architektur (MVP)
 
 - **API:** FastAPI, Python 3.12
-- **Persistenz:** PostgreSQL, SQLAlchemy 2, Alembic
+- **Persistenz:** PostgreSQL, SQLAlchemy 2 (Alembic-Migrationen als nächster Betriebsbaustein)
 - **Domänenkern:** Authority Graph, Delegation, Effective Authority, Policy Decision Point
 - **Durchsetzung:** geschützte Sandbox-Business-API mit transaktionaler Autorisierungsprüfung
 - **Oberfläche:** Next.js / TypeScript (separater Web-Client; folgt nach dem stabilen Domänenkern)
