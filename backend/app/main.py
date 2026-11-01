@@ -62,15 +62,33 @@ def authority_graph(organization_id: str = Query(min_length=1, max_length=80), d
     grants = db.scalars(select(AuthorityGrant).where(AuthorityGrant.organization_id == organization_id)).all()
     delegations = db.scalars(select(Delegation).where(Delegation.organization_id == organization_id)).all()
     resources = db.scalars(select(BusinessResource).where(BusinessResource.organization_id == organization_id)).all()
-    nodes = [GraphNode(id=organization.id, label=organization.name, typ="ORGANISATION", status="ACTIVE")]
-    nodes += [GraphNode(id=p.id, label=p.display_name, typ="MENSCH" if p.kind == "HUMAN" else "KI_AGENT", status=p.status) for p in principals]
-    nodes += [GraphNode(id=r.id, label=r.display_name, typ="RESSOURCE", status=r.status) for r in resources]
+    nodes = [GraphNode(id=organization.id, label=organization.name, typ="ORGANISATION",
+        status="ACTIVE", beschreibung=f"Rechtsträger · {organization.legal_entity_code}")]
+    nodes += [GraphNode(id=p.id, label=p.display_name, typ="MENSCH" if p.kind == "HUMAN" else "KI_AGENT",
+        status=p.status, beschreibung=f"{p.kind} · Aussteller: {p.issuer or 'nicht hinterlegt'}") for p in principals]
+    nodes += [GraphNode(id=r.id, label=r.display_name, typ="RESSOURCE", status=r.status,
+        beschreibung=f"Ressourcentyp · {r.resource_type}") for r in resources]
     edges = []
+    for principal in principals:
+        edges.append(GraphEdge(id=f"membership-{principal.id}", von=organization.id, nach=principal.id,
+            typ="ORGANISATIONSZUGEHOERIGKEIT", beschreibung="Principal gehört zu diesem Rechtsträger"))
+    for resource in resources:
+        edges.append(GraphEdge(id=f"resource-{resource.id}", von=organization.id, nach=resource.id,
+            typ="ORGANISATIONSRESSOURCE", beschreibung="Ressource des Rechtsträgers"))
     for grant in grants:
-        edges.append(GraphEdge(id=grant.id, von=grant.principal_id, nach=grant.resource_id, typ="VOLLMACHT", limit=grant.max_amount))
+        edges.append(GraphEdge(id=grant.id, von=grant.principal_id, nach=grant.resource_id, typ="VOLLMACHT",
+            limit=grant.max_amount, waehrung=grant.currency, aktionen=grant.actions,
+            delegierbar=grant.can_delegate, gueltig_bis=grant.valid_until,
+            beschreibung="Ursprüngliche geschäftliche Vollmacht"))
     for item in delegations:
-        edges.append(GraphEdge(id=item.id, von=item.delegator_id, nach=item.delegate_id, typ="DELEGATION", limit=item.max_amount))
-        edges.append(GraphEdge(id=f"access-{item.id}", von=item.delegate_id, nach=item.resource_id, typ="DELEGIERTER_ZUGRIFF", limit=item.max_amount))
+        edges.append(GraphEdge(id=item.id, von=item.delegator_id, nach=item.delegate_id, typ="DELEGATION",
+            limit=item.max_amount, waehrung=item.currency, aktionen=item.actions,
+            delegierbar=item.can_subdelegate, gueltig_bis=item.valid_until,
+            beschreibung=f"Teildelegation · Weiterdelegation {'erlaubt' if item.can_subdelegate else 'gesperrt'}"))
+        edges.append(GraphEdge(id=f"access-{item.id}", von=item.delegate_id, nach=item.resource_id,
+            typ="DELEGIERTER_ZUGRIFF", limit=item.max_amount, waehrung=item.currency,
+            aktionen=item.actions, delegierbar=item.can_subdelegate, gueltig_bis=item.valid_until,
+            beschreibung="Effektiver Zugriff des delegierten Agenten"))
     return {"knoten": [n.model_dump() for n in nodes], "verbindungen": [e.model_dump() for e in edges]}
 
 @app.post("/api/v1/autorisierung/pruefen", response_model=DecisionResponse)
