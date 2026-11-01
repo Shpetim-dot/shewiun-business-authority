@@ -20,6 +20,25 @@ class PaymentRequest(BaseModel):
     amount: Decimal = Field(gt=0, max_digits=18, decimal_places=2)
     currency: str = Field(min_length=3, max_length=3)
 
+class DelegationCreateRequest(BaseModel):
+    organization_id: str = Field(min_length=1, max_length=80)
+    grant_id: str = Field(min_length=1, max_length=100)
+    delegator_id: str = Field(min_length=1, max_length=100)
+    delegate_id: str = Field(min_length=1, max_length=100)
+    resource_id: str = Field(min_length=1, max_length=100)
+    actions: list[str] = Field(min_length=1)
+    max_amount: Decimal | None = Field(default=None, ge=0, max_digits=18, decimal_places=2)
+    currency: str | None = Field(default=None, min_length=3, max_length=3)
+    can_subdelegate: bool = False
+    valid_from: datetime | None = None
+    valid_until: datetime | None = None
+    parent_delegation_id: str | None = None
+
+class RevocationRequest(BaseModel):
+    organization_id: str = Field(min_length=1, max_length=80)
+    initiated_by: str = Field(default="system-administration", min_length=1, max_length=100)
+    reason: str = Field(default="Geschäftliche Autorität widerrufen", max_length=500)
+
 class DecisionResponse(BaseModel):
     decision_id: str
     entscheidung: str
