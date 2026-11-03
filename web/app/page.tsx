@@ -419,7 +419,7 @@ export default function Home() {
             </section>
 
             <section className="partner-usecase-section">
-              <div className="partner-section-heading"><div><div className="panel-kicker">MAPPED TO S-PRO'S PUBLISHED AGENT WORKFLOWS</div><h3>Use Cases, bei denen eine klare Autorisierungsgrenze zählt.</h3><p>Die ersten vier Szenarien orientieren sich an S-PROs öffentlich beschriebenen Agenten für AML, KYC, Client Support und Credit. Nur der Payment-Fall ist in dieser Demo live ausführbar.</p></div><Badge tone="warn">1 LIVE · 4 BLUEPRINTS</Badge></div>
+              <div className="partner-section-heading"><div><div className="panel-kicker">MAPPED TO S-PRO'S PUBLISHED AGENT WORKFLOWS</div><h3>Use Cases, bei denen eine klare Autorisierungsgrenze zählt.</h3><p>Die ersten vier Szenarien orientieren sich an S-PROs öffentlich beschriebenen Agenten für AML, KYC, Client Support und Credit. Nur der Payment-Fall ist in dieser Demo live ausführbar.</p></div><Badge tone="warn">1 LIVE · 5 BLUEPRINTS</Badge></div>
               <div className="partner-usecase-grid">
                 <article className="partner-usecase partner-usecase-featured">
                   <div className="partner-usecase-top"><span>01 · AML / TRANSACTION MONITORING</span><Badge tone="warn">INTEGRATION BLUEPRINT</Badge></div>
@@ -451,6 +451,13 @@ export default function Home() {
                   <div className="partner-usecase-example"><strong>Testidee</strong><span>Kann eine Empfehlung über die finale Action API in eine Kreditentscheidung umgewandelt werden? Erwartung: deny ohne berechtigten Entscheider.</span></div>
                 </article>
                 <article className="partner-usecase">
+                  <div className="partner-usecase-top"><span>05 · WEALTH / RELATIONSHIP MANAGEMENT</span><Badge tone="warn">INTEGRATION BLUEPRINT</Badge></div>
+                  <h4>Relationship-manager & investment copilot</h4>
+                  <p>Der Agent bereitet Kundenbriefings, Portfolio-Fragen und Research-Notizen vor und verbindet Kundendaten mit genehmigten Marktinformationen.</p>
+                  <div className="partner-usecase-columns"><div><small>AGENT MAY</small><span>Portfolio lesen · Briefing entwerfen · Research zusammenfassen</span></div><div><small>HUMAN / POLICY GATE</small><span>Order platzieren · Portfolio-Allokation ändern · Anlageentscheidung auslösen</span></div></div>
+                  <div className="partner-usecase-example"><strong>Testidee</strong><span>Eine gültige Leseberechtigung wird nicht zu einer Handelsvollmacht. Jede Order muss an Mandat, Instrument, Portfolio, Parameter und Freigabe gebunden sein.</span></div>
+                </article>
+                <article className="partner-usecase">
                   <div className="partner-usecase-top"><span>05 · DIGITAL BANKING / TREASURY</span><Badge tone="good">LIVE PAYMENT SANDBOX</Badge></div>
                   <h4>Business payments & multi-entity approvals</h4>
                   <p>Der Agent bereitet eine Zahlung vor. Die bestehende Sandbox zeigt, wie eine delegierte Vollmacht, ein konkreter Account-Scope und ein Limit vor der Mutation ausgewertet werden.</p>
@@ -472,6 +479,8 @@ export default function Home() {
                 <article><span>06</span><strong>AgentProof Runtime Analysis</strong><p>Agent-Manifeste und bereitgestellte Runtime-Event-Ketten können gegen einen Contract geprüft werden; SHA-256 Evidence Hash, mögliche Kontrollabweichungen und Remediation werden strukturiert.</p><small>SEPARATE ENGINE / INTEGRATION TARGET</small></article>
                 <article><span>07</span><strong>Authenticated Agent Discovery</strong><p>AgentProof unterstützt explizit autorisierte HTTPS-Discovery für Sandbox-/Non-Production-Agenten und prüft die Authentisierung am Identity Endpoint.</p><small>AGENTPROOF PLATFORM CAPABILITY</small></article>
                 <article><span>08</span><strong>Exact Retest</strong><p>Dieselben definierten Tests nach der Korrektur erneut ausführen. Ein Fix wird gegen die ursprüngliche Erwartung geprüft statt nur als erledigt markiert.</p><small>POLICY-LEVEL RETEST</small></article>
+                <article><span>09</span><strong>Adversarial Hypothesis Planner</strong><p>Der optionale AgentProof-Planer kann aus einem validierten Non-production-Scope nicht-destruktive Angriffshypothesen und Guardrails ableiten. Eine Hypothese ist kein ausgeführter Angriff.</p><small>AGENTPROOF · CONFIGURATION REQUIRED</small></article>
+                <article><span>10</span><strong>Workspace & Role Governance</strong><p>Die separate AgentProof-Plattform enthält authentifizierte Organisations-Workspaces, Mitgliedschaften und rollenbasierte Assessment-Berechtigungen.</p><small>AGENTPROOF PLATFORM · NOT IN THIS DEMO</small></article>
               </div>
               <p className="partner-claim-note">Wichtig: Im aktuellen Partner-Demonstrator ist nur der Payment-Sandbox-Flow direkt mit der Business-Authority-API verbunden. AgentProofs Runtime-Analyse wertet bereitgestellte bzw. autorisiert erhobene Evidenz aus; sie behauptet keine autonome produktive Exploit-Ausführung. MCP-Runtime-Interception, signierte Einmalfreigaben, SSO/SCIM und produktive Tenant-Isolation sind Integrations- bzw. Ausbauarbeiten.</p>
             </section>
