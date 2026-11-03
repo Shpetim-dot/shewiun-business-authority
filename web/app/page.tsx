@@ -423,6 +423,8 @@ export default function Home() {
                 <a href="https://s-pro.io/ai-agents-aml-transaction-monitoring-bank/" target="_blank" rel="noreferrer">AML & Transaction Monitoring ↗</a>
                 <a href="https://s-pro.io/ai-for-wealth-and-asset-managers/" target="_blank" rel="noreferrer">Wealth Management ↗</a>
                 <a href="https://s-pro.io/blog/prompt-injection-defense/" target="_blank" rel="noreferrer">Prompt-Injection-Defense ↗</a>
+                <a href="https://s-pro.io/de/ki-agenten-produktionsfreigabe-bank-sechs-gates/" target="_blank" rel="noreferrer">6 Produktions-Gates ↗</a>
+                <a href="https://s-pro.io/blog/automated-control-testing" target="_blank" rel="noreferrer">Automated Control Testing ↗</a>
               </div>
             </section>
 
