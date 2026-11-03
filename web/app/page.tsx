@@ -130,7 +130,7 @@ function Icon({ name }: { name: string }) {
 }
 
 export default function Home() {
-  const [section, setSection] = useState("uebersicht");
+  const [section, setSection] = useState("partner");
   const [apiState, setApiState] = useState<ApiState>("pruefung");
   const [nodes, setNodes] = useState<GraphNode[]>([]);
   const [edges, setEdges] = useState<GraphEdge[]>([]);
@@ -316,7 +316,7 @@ export default function Home() {
   function title() { return nav.find(n => n.id === section)?.label || "Übersicht"; }
 
   return (
-    <div className="shell">
+    <div className={section === "partner" ? "shell shell-partner" : "shell"}>
       <aside className="sidebar">
         <div className="brand">
           <div><div className="brand-name">SHEWIUN</div><div className="brand-sub">AI AGENT AUTHORIZATION SECURITY</div></div>
@@ -351,6 +351,7 @@ export default function Home() {
               <nav aria-label="Demo Navigation">
                 <a href="#sp-value">Zusammenarbeit</a>
                 <a href="#sp-cases">Anwendungsfälle</a>
+                <a href="#sp-architecture">Technische Architektur</a>
                 <a href="#sp-live">Live-Beispiel</a>
                 <a href="#sp-pilot">Pilot</a>
               </nav>
@@ -360,7 +361,7 @@ export default function Home() {
               <div className="sp-hero-main">
                 <div className="sp-kicker">S-PRO × SHEWIUN · BANKING & FINTECH</div>
                 <h2>Sie bauen die Agenten.<br/><span>Wir prüfen, was sie auslösen dürfen.</span></h2>
-                <p>S-PRO entwickelt KI-Agenten und integriert sie in die Systeme von Banken und Fintechs. SHEWIUN kann diese Projekte um eine zusätzliche Prüfung ergänzen: Darf dieser Agent genau diese Geschäftsaktion mit dieser Identität, für diesen Kunden und unter diesen Bedingungen ausführen?</p>
+                <p>S-PRO entwickelt und integriert Agenten für regulierte Finanzprozesse. SHEWIUN soll diese Arbeit nicht ersetzen. Wir ergänzen eine eng umrissene Kontrollfrage vor einer Aktion mit Nebenwirkung: Ist dieser konkrete Tool-Aufruf durch eine nachvollziehbare geschäftliche Vollmacht gedeckt – für genau diesen Agenten, Auftraggeber, Kunden, Zweck und Parametersatz?</p>
                 <div className="sp-hero-actions">
                   <a className="sp-button sp-button-primary" href="#sp-live">Live-Beispiel ansehen</a>
                   <a className="sp-button sp-button-secondary" href="#sp-pilot">Pilotansatz besprechen</a>
@@ -384,17 +385,17 @@ export default function Home() {
                 <article>
                   <div className="sp-column-label">WAS S-PRO BEREITS LIEFERT</div>
                   <h4>Agenten, die in Finanzprozesse eingebettet sind</h4>
-                  <p>Nach den veröffentlichten S-PRO-Angeboten umfasst das unter anderem KYC und Onboarding, periodische Kundenprüfungen, AML-Alert-Triage, Kreditdossiers, Kundenservice und Wissenssuche. S-PRO beschreibt ausserdem Evaluierungen, menschliche Freigaben und Audit-Protokollierung als Teil des Ansatzes.</p>
+                  <p>S-PRO beschreibt bereits Agenten für KYC/Onboarding, Periodic Review, Adverse-Media- und AML-Triage, Kreditdossiers, RM-Copilots und interne Wissensarbeit. Zum veröffentlichten Ansatz gehören Evaluierungen vor dem Go-live, menschliche Freigaben und nachvollziehbare Quellen- und Aktionsprotokolle. SHEWIUN setzt genau dort an, wo ein Agent aus einer Empfehlung einen technisch ausführbaren Geschäftsauftrag machen könnte.</p>
                   <a href="https://s-pro.io/de/blog/agentic-banking-anwendungsfalle" target="_blank" rel="noreferrer">S-PRO: Agentic Banking – Anwendungsfälle ↗</a>
                 </article>
                 <article className="sp-column-shewiun">
                   <div className="sp-column-label">WAS SHEWIUN ERGÄNZEN KANN</div>
                   <h4>Geschäftsautorität ausdrücklich festlegen und testen</h4>
-                  <p>Wir modellieren, wer einem Agenten welche Rechte übertragen darf, auf welche Ressource sie gelten, welche Parameter erlaubt sind und wann eine Freigabe nötig ist. Anschliessend testen wir, ob die definierten Grenzen eingehalten werden.</p>
-                  <span className="sp-note">Die Ergänzung ist besonders interessant, wenn mehrere Tools, APIs oder Agenten gemeinsam eine geschäftskritische Aktion ermöglichen.</span>
+                  <p>Wir machen die delegierte Geschäftsautorität maschinenprüfbar: Wer handelt in wessen Auftrag, über welche Delegationskette, auf welcher Ressource, für welchen Zweck, mit welchen Parametern und unter welchen Freigabe- und Betragsgrenzen? Daraus entsteht ein versionierter Authorization Contract, gegen den konkrete Aktionen und Negativfälle geprüft werden können.</p>
+                  <span className="sp-note">Besonders relevant bei Tool-Ketten: Eine einzelne API-Berechtigung sagt nicht automatisch, ob die kombinierte Geschäftsaktion im konkreten Kunden- und Delegationskontext erlaubt ist.</span>
                 </article>
               </div>
-              <div className="sp-value-line"><strong>Der praktische Nutzen für S-PRO:</strong> ein zusätzlicher, klar abgrenzbarer Assessment- und Integrationsbaustein für Kundenprojekte – ohne S-PROs bestehende Agenten, Architektur oder Freigabeprozesse zu ersetzen.</div>
+              <div className="sp-value-line"><strong>Der mögliche Mehrwert für S-PRO:</strong> ein wiederverwendbarer Assurance-Baustein für Kundenprojekte – mit expliziten Geschäftsrechten, reproduzierbaren Policy-Tests und einem zusätzlichen Nachweis pro kritischer Aktion. S-PRO behält Agentenarchitektur, Modelle, Workflows, Kundenintegration und die bestehende Human-in-the-Loop-Verantwortung.</div>
             </section>
 
             <section className="sp-section" id="sp-cases">
@@ -406,19 +407,24 @@ export default function Home() {
                 <table className="sp-case-table">
                   <thead><tr><th>Use Case</th><th>Was der Agent vorbereitet</th><th>Geschäftskritische Grenze</th><th>Beitrag von SHEWIUN</th></tr></thead>
                   <tbody>
-                    <tr><td><strong>AML-Alert-Triage</strong><small>Bank · Compliance</small></td><td>Alert-Kontext sammeln, Treffer vergleichen, Fallnotiz und Empfehlung erstellen.</td><td>Fall schliessen, eskalieren oder eine Meldung auslösen.</td><td>Prüfen, ob die finale Aktion an Fall, Rolle und menschliche Entscheidung gebunden ist.</td></tr>
+                    <tr><td><strong>AML-Alert-Triage</strong><small>Bank · Compliance</small></td><td>Kontext aus dem bestehenden Monitoring-System sammeln, Fallnarrativ und Dispositionsvorschlag vorbereiten.</td><td>Die Analystin oder der Analyst entscheidet über Schliessen, Eskalieren oder Melden. Ein Agent soll diese Verantwortung nicht stillschweigend übernehmen.</td><td>Den Agenten auf Recherche und Entwurf begrenzen; jede spätere Schreib- oder Statusaktion an Fall-ID, Rolle und explizite Freigabe binden.</td></tr>
                     <tr><td><strong>KYC & Periodic Review</strong><small>Bank · Wealth Manager</small></td><td>Dokumente auswerten, Daten abgleichen, Review-Entwurf vorbereiten.</td><td>KYC-Status ändern, Kundenrisiko neu einstufen oder Onboarding abschliessen.</td><td>Rechte für Lesen, Entwurf und finale Statusänderung getrennt modellieren und testen.</td></tr>
                     <tr><td><strong>Credit Memo</strong><small>Bank · Lending</small></td><td>Unterlagen extrahieren, Kennzahlen berechnen, Kreditmemo entwerfen.</td><td>Kredit genehmigen, Limit setzen oder Konditionen verändern.</td><td>Prüfen, ob eine Analyseberechtigung versehentlich zur Kreditentscheidung führt.</td></tr>
                     <tr><td><strong>Relationship Manager Copilot</strong><small>Private Banking · Asset Management</small></td><td>Call Briefing, Portfolio-Kontext und Research zusammenstellen.</td><td>Order platzieren oder Portfolio- und Kundendaten verändern.</td><td>Mandat, Portfolio, Instrument, Transaktionsparameter und Freigabe zusammen prüfen.</td></tr>
                     <tr><td><strong>Customer Support & Refunds</strong><small>Neobroker · Fintech</small></td><td>Ticket beantworten, Kontostatus erklären, Refund vorbereiten.</td><td>Refund ausführen, Betrag erhöhen oder Empfänger ändern.</td><td>Prüfen, ob eine Freigabe tatsächlich an Kunde, Refund, Betrag und Empfänger gebunden ist.</td></tr>
                     <tr><td><strong>Interne Wissenssuche</strong><small>Bank · Operations</small></td><td>Interne Richtlinien suchen und eine quellenbezogene Antwort erstellen.</td><td>Geschützte Informationen ausserhalb der Nutzerrolle offenlegen oder eine Policy-Änderung auslösen.</td><td>Ressourcen- und Daten-Scope zusammen mit der tatsächlichen Nutzer- und Agentenidentität prüfen.</td></tr>
+                    <tr><td><strong>Untrusted Documents & Prompt Injection</strong><small>KYC · AML · RM Copilot</small></td><td>Agent liest externe PDFs, E-Mails, Registerauszüge oder Freitextfelder.</td><td>Ein manipulierter Inhalt versucht, Tool-Aufrufe auszulösen, Daten-Scope zu erweitern oder fremde Kundendaten offenzulegen.</td><td>SHEWIUN prüft den nachgelagerten Tool-Aufruf gegen Contract und Scope. Prompt- und Datenabwehr bleibt eine zusätzliche S-PRO-Kontrollschicht.</td></tr>
                   </tbody>
                 </table>
               </div>
               <div className="sp-source-links">
-                <span>Weiterführende S-PRO-Beispiele:</span>
+                <span>Abgleich mit S-PROs veröffentlichtem Ansatz:</span>
+                <a href="https://s-pro.io/de/blog/agentic-banking-anwendungsfalle" target="_blank" rel="noreferrer">Agentic Banking ↗</a>
                 <a href="https://s-pro.io/ai-agents-aml-transaction-monitoring-bank/" target="_blank" rel="noreferrer">AML & Transaction Monitoring ↗</a>
-                <a href="https://s-pro.io/ai-for-wealth-and-asset-managers/" target="_blank" rel="noreferrer">Wealth & Asset Management ↗</a>
+                <a href="https://s-pro.io/ai-for-wealth-and-asset-managers/" target="_blank" rel="noreferrer">Wealth Management ↗</a>
+                <a href="https://s-pro.io/blog/prompt-injection-defense/" target="_blank" rel="noreferrer">Prompt-Injection-Defense ↗</a>
+                <a href="https://s-pro.io/de/ki-agenten-produktionsfreigabe-bank-sechs-gates/" target="_blank" rel="noreferrer">6 Produktions-Gates ↗</a>
+                <a href="https://s-pro.io/blog/automated-control-testing" target="_blank" rel="noreferrer">Automated Control Testing ↗</a>
               </div>
             </section>
 
@@ -466,10 +472,93 @@ export default function Home() {
               </div>
             </section>
 
+
+            <section className="sp-section sp-technical-section" id="sp-architecture">
+              <div className="sp-section-heading">
+                <div><div className="sp-kicker">TECHNISCHE REFERENZARCHITEKTUR</div><h3>Eine Policy-Prüfung vor der geschützten Aktion</h3></div>
+                <p>Der Integrationsvorschlag setzt am serverseitigen Tool- oder API-Aufruf an – nicht im Prompt und nicht als zweiter Agent. Die folgende Architektur ist ein gemeinsames Zielbild, noch keine produktiv integrierte S-PRO-Runtime.</p>
+              </div>
+              <div className="sp-architecture-status"><span>INTEGRATIONSKONZEPT</span><strong>Vorschlag für einen Non-production-Pilot · nicht Bestandteil des aktuellen Live-Flows</strong></div>
+              <div className="sp-architecture-flow">
+                <article>
+                  <span className="sp-arch-index">01 · S-PRO / KUNDE</span>
+                  <h4>Agent Runtime</h4>
+                  <p>Modell, Orchestrierung und Tool-Auswahl bleiben in der bestehenden S-PRO- bzw. Kundenarchitektur.</p>
+                  <code>tool_call</code>
+                </article>
+                <b aria-hidden="true">→</b>
+                <article>
+                  <span className="sp-arch-index">02 · ENFORCEMENT POINT</span>
+                  <h4>API- oder MCP-Adapter</h4>
+                  <p>Bindet die echte Workload-Identität und den typisierten Request. Keine Side-Effect-Aktion vor der Prüfung.</p>
+                  <code>PEP · Policy Enforcement</code>
+                </article>
+                <b aria-hidden="true">→</b>
+                <article className="sp-arch-highlight">
+                  <span className="sp-arch-index">03 · SHEWIUN</span>
+                  <h4>Authority Engine</h4>
+                  <p>Prüft Delegation, Mandant, Ressource, Aktion, Zweck, Parameter und Freigabestatus gegen den Contract.</p>
+                  <code>PDP · ALLOW / DENY</code>
+                </article>
+                <b aria-hidden="true">→</b>
+                <article>
+                  <span className="sp-arch-index">04 · GESCHÜTZTES SYSTEM</span>
+                  <h4>Business API</h4>
+                  <p>Der Adapter führt den Aufruf nur nach gültiger Entscheidung aus. Die API bleibt die letzte Durchsetzungsgrenze.</p>
+                  <code>side effect</code>
+                </article>
+                <b aria-hidden="true">→</b>
+                <article>
+                  <span className="sp-arch-index">05 · GOVERNANCE</span>
+                  <h4>Evidence Event</h4>
+                  <p>Decision ID, Correlation ID, Policy-Version, geprüfte Attribute und Ergebnis werden nachvollziehbar verknüpft.</p>
+                  <code>audit / SIEM</code>
+                </article>
+              </div>
+              <div className="sp-architecture-caption"><strong>Wichtige Unterscheidung:</strong> Das PDP trifft die Policy-Entscheidung. Der PEP erzwingt sie an der Stelle, an der der API-Aufruf tatsächlich ausgeführt wird. Eine Anzeige im Dashboard allein wäre keine Sicherheitskontrolle. <strong>Prompt-Injection-Grenze:</strong> SHEWIUN erkennt oder neutralisiert keine manipulierten Dokumente und bewertet nicht die Modellantwort. Es prüft die daraus resultierende Aktion gegen die Geschäftsautorität. Eine schädliche Aktion, die innerhalb aller gewährten Rechte liegt, braucht weiterhin die zusätzlichen Modell-, Daten- und Prozesskontrollen von S-PRO.</div>
+
+              <div className="sp-contract-layout">
+                <article className="sp-code-card">
+                  <div className="sp-code-head"><div><span>REQUEST CONTRACT</span><strong>Beispiel eines typisierten Requests</strong></div><small>Demo-Felder · synthetische Identitäten</small></div>
+                  <pre><code>{'{\n  "organization_id": "org-alpenbank",\n  "agent_id": "agent-payment-01",\n  "acting_for_id": "person-cfo-anna",\n  "resource_id": "konto-corporate-1001",\n  "action": "payment.create",\n  "tool": "payment.create",\n  "permission": "payment.create",\n  "purpose": "supplier_payment",\n  "amount": "5000.00",\n  "currency": "CHF",\n  "runtime_identity": "shewiun-demo-issuer",\n  "data_scope": "konto-corporate-1001"\n}'}</code></pre>
+                  <p>Die Werte kommen im Pilot aus vertrauenswürdigen Runtime-, IAM- und Geschäftssystemen – nicht aus einer freien Selbstauskunft des Sprachmodells. In der aktuellen Demo sind sie synthetische Testwerte.</p>
+                </article>
+                <div className="sp-contract-side">
+                  <div className="sp-contract-output">
+                    <span>POLICY DECISION</span><strong>Strukturiertes Ergebnis</strong>
+                    <div><code>entscheidung</code><b>ALLOW / DENY</b></div>
+                    <div><code>decision_id</code><b>eindeutige Entscheidung</b></div>
+                    <div><code>policy_version</code><b>Version der Regel</b></div>
+                    <div><code>checks[]</code><b>Einzelne Prüfergebnisse</b></div>
+                    <div><code>approval_required</code><b>Freigabe erforderlich?</b></div>
+                    <div><code>correlation_id</code><b>Verknüpfung zum Runtime-Request</b></div>
+                  </div>
+                  <div className="sp-contract-warning"><strong>Produktionsvoraussetzung:</strong> Identität, Delegationsquelle und Freigabe müssen aus vertrauenswürdigen Systemen kommen. Signierte, einmalige und an Betrag, Empfänger und Ressource gebundene Freigaben wären Teil der gemeinsamen Integration – nicht der aktuellen Demo.</div>
+                </div>
+              </div>
+            </section>
+
+            <section className="sp-section sp-boundary-section" id="sp-boundary">
+              <div className="sp-section-heading">
+                <div><div className="sp-kicker">KLARE SYSTEMGRENZEN</div><h3>Was SHEWIUN ergänzt – und was bewusst bei S-PRO bleibt</h3></div>
+                <p>Das vermeidet eine zweite IAM-, Agenten- oder Workflow-Plattform. Jede Komponente hat einen klaren Eigentümer und eine klar definierte Schnittstelle.</p>
+              </div>
+              <div className="sp-boundary-table">
+                <div className="sp-boundary-head"><span>Bereich</span><span>S-PRO / Kundensystem</span><span>SHEWIUN-Beitrag</span></div>
+                <div><strong>Identität & Zugriff</strong><span>IdP, SSO, Service Identity, Rollen und technische Zugriffsrechte bleiben führend.</span><span>Verknüpft die validierte Identität mit Auftraggeber, Delegation und Geschäftsautorität.</span></div>
+                <div><strong>Agent & Workflow</strong><span>Modell, Orchestrierung, Datenanbindung, Prompt- und Tool-Design bleiben in der bestehenden Lösung.</span><span>Bewertet nicht die Qualität der Antwort, sondern die Befugnis des konkreten Tool-Aufrufs.</span></div>
+                <div><strong>Human-in-the-Loop</strong><span>Bestehende Freigabeoberfläche und Verantwortlichkeit bleiben beim Kunden bzw. in der S-PRO-Lösung.</span><span>Prüft, ob der benötigte Freigabestatus für genau diese Aktion und Parameter vorliegt.</span></div>
+                <div><strong>Policy & Delegation</strong><span>Kundenregeln und fachliche Vollmachten werden vom Kunden verantwortet und freigegeben.</span><span>Modelliert die Delegationskette und macht Grenzen als prüfbaren Contract ausführbar.</span></div>
+                <div><strong>Evaluation & Security Testing</strong><span>S-PRO prüft Agentenqualität, Modellverhalten, Datenquellen und Gesamtworkflow.</span><span>Ergänzt Policy-Regressionstests: erlaubte Aktionen müssen funktionieren, unzulässige Kombinationen müssen abgewiesen werden.</span></div>
+                <div><strong>Audit & Evidence</strong><span>Das zentrale Kunden-Audit bzw. SIEM bleibt das führende System.</span><span>Liefert Decision-Kontext, Policy-Version und strukturierte Prüfergebnisse zur Weitergabe.</span></div>
+              </div>
+              <div className="sp-no-claim"><strong>Keine falsche Abgrenzung:</strong> S-PRO beschreibt bereits Least-Privilege-Prinzipien, menschliche Freigaben, Evaluationen, Audit-Trails und deterministische Kontrollen. SHEWIUN beansprucht diese Fähigkeiten nicht exklusiv. Der mögliche Zusatz ist ein explizites, wiederverwendbares Modell geschäftlicher Delegation und dessen Prüfung direkt vor einer konkreten Aktion.</div>
+            </section>
+
             <section className="sp-section">
               <div className="sp-section-heading">
                 <div><div className="sp-kicker">SHEWIUN & AGENTPROOF</div><h3>Was heute vorhanden ist – und was gemeinsam integriert würde</h3></div>
-                <p>Wir trennen bewusst zwischen dem, was dieser Demonstrator bereits zeigt, und Funktionen aus AgentProof bzw. einer späteren Kundenintegration.</p>
+                <p>Wir trennen bewusst zwischen live gezeigter Backend-Funktion, separaten AgentProof-Fähigkeiten und Integrationsarbeit, die erst gemeinsam mit S-PRO bzw. dem Kunden entstehen würde.</p>
               </div>
               <div className="sp-capability-table">
                 <div><strong>Business Authority Graph</strong><p>Modelliert Organisation, menschliche Vollmacht, Agenten-Delegation, Ressourcen, Aktionen und Limits.</p><span className="sp-status sp-status-live">Im Demo-Backend vorhanden</span></div>
@@ -480,7 +569,7 @@ export default function Home() {
                 <div><strong>Agent discovery & adversarial planning</strong><p>AgentProof enthält authentifizierte Discovery für explizit autorisierte Non-production-Agenten sowie einen optionalen, nicht-destruktiven Hypothesenplaner.</p><span className="sp-status sp-status-separate">Separate Plattformfunktionen · Konfiguration nötig</span></div>
                 <div><strong>Produktive Durchsetzung bei S-PRO-Kunden</strong><p>Einbindung als Policy Decision Point mit Enforcement im geschützten API-Service oder MCP-Wrapper. Die echte Runtime-Ereignisquelle und die sichere Identitäts- und Freigabebindung würden wir gemeinsam definieren.</p><span className="sp-status sp-status-next">Gemeinsame Integrationsarbeit</span></div>
               </div>
-              <p className="sp-limit-note">Wichtig: Die 40/67 Tests sind in diesem Demonstrator Policy-Tests – kein autonomer Penetrationstest. Die Approval-Felder sind Testeingaben, keine kryptografisch signierten Einmalfreigaben. Die produktive Integration in eine externe S-PRO-Runtime ist noch nicht Bestandteil dieser Demo.</p>
+              <p className="sp-limit-note">Wichtig: Die 40/67 Angaben bezeichnen konfigurierte Policy-Testfälle, nicht eine erreichte Erfolgsquote oder einen Penetrationstest. Die Approval-Felder sind aktuelle Testeingaben, keine kryptografisch signierten Einmalfreigaben. AgentProof ist hier nicht in den Payment-Flow eingebunden. MCP/API-Interception, SSO/SCIM, externe Identitätsquellen und eine produktive S-PRO-Runtime sind gemeinsame Integrationsarbeit.</p>
             </section>
 
             <section className="sp-section" id="sp-pilot">
@@ -489,14 +578,25 @@ export default function Home() {
                 <p>Kein Plattformwechsel und kein Zugriff auf ein ganzes Banksystem. Wir würden zuerst den einen Workflow auswählen, bei dem die Autorisierungsgrenze am wichtigsten ist.</p>
               </div>
               <div className="sp-pilot-steps">
-                <article><span>01</span><h4>Use Case auswählen</h4><p>Zum Beispiel AML-Alert-Triage, KYC-Statusänderung oder eine Refund-Freigabe.</p></article>
-                <article><span>02</span><h4>Authority Contract definieren</h4><p>Agent, Auftraggeber, Aktion, Kunde/Konto, Zweck, Parameter, Limit und notwendige Freigabe festhalten.</p></article>
-                <article><span>03</span><h4>Im Testsystem prüfen</h4><p>Erlaubte und verbotene Szenarien ausführen, Evidence sichern und konkrete Findings dokumentieren.</p></article>
-                <article><span>04</span><h4>Integration bewerten</h4><p>Gemeinsam entscheiden, ob SHEWIUN vor einer kritischen API-Aktion eingebunden wird und wie ein Retest abläuft.</p></article>
+                <article><span>01</span><h4>Use Case abgrenzen</h4><p>Ein Agent, ein Prozess und eine Aktion mit klarer Nebenwirkung – bevorzugt auf einer Non-production-API.</p></article>
+                <article><span>02</span><h4>Authority Contract definieren</h4><p>Agent, Auftraggeber, Delegationsquelle, Ressource, Zweck, Parameter, Limits und Freigabezustand festhalten.</p></article>
+                <article><span>03</span><h4>Kontrollfälle ausführen</h4><p>Positive und negative Szenarien testen: falsche Identität, Mandant, Ressource, Aktion, Betrag oder fehlende Freigabe.</p></article>
+                <article><span>04</span><h4>Enforcement bewerten</h4><p>PEP-Platzierung, Laufzeitidentität, Approval-Bindung, Audit-Export und Betriebsverantwortung gemeinsam festlegen.</p></article>
+              </div>
+              <div className="sp-pilot-deliverables">
+                <div><span>ERGEBNISSE DES PILOT-SCOPES</span><strong>Was S-PRO und der Kunde erhalten</strong></div>
+                <ul><li>Abgestimmte Action- und Authority-Matrix</li><li>Versionierter Authorization Contract</li><li>Reproduzierbare ALLOW/DENY-Testfälle inklusive Positivkontrollen</li><li>Findings mit Decision-Kontext und nachvollziehbaren Prüfergebnissen</li><li>Integrationsskizze mit Identitäts-, Approval- und Enforcement-Grenzen</li></ul>
+              </div>
+              <div className="sp-acceptance">
+                <strong>Vorgeschlagene Abnahmekriterien – gemeinsam festzulegen</strong>
+                <div><span>01</span> Legitime Referenzaktionen werden weiterhin erlaubt.</div>
+                <div><span>02</span> Falscher Mandant, Agent, Auftraggeber, Ressource, Zweck oder Parameter führt zur erwarteten Ablehnung.</div>
+                <div><span>03</span> Eine Ablehnung erzeugt keinen Side Effect im geschützten Testsystem.</div>
+                <div><span>04</span> Jede Entscheidung ist über Decision ID, Correlation ID und Policy-Version rekonstruierbar.</div>
               </div>
               <div className="sp-next-call">
                 <div><strong>Was wir im nächsten Gespräch gemeinsam klären sollten</strong><p>Welcher bestehende S-PRO-Agent hat eine kritische Aktion? Welche Identitäts- und Runtime-Daten können im Non-production-System bereitgestellt werden? An welcher API oder welchem Tool lässt sich die Grenze sinnvoll prüfen?</p></div>
-                <div className="sp-next-question">Welcher Ihrer bestehenden Agenten wäre der beste Kandidat für einen ersten gemeinsamen Pilot?</div>
+                <div className="sp-next-question">Welcher bestehende Agent hat einen Tool-Aufruf mit echter Geschäftsnebenwirkung – und können wir genau diesen Aufruf in einer Non-production-Umgebung gemeinsam begrenzen und testen?</div>
               </div>
             </section>
 
