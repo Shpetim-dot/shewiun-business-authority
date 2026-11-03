@@ -316,7 +316,7 @@ export default function Home() {
   function title() { return nav.find(n => n.id === section)?.label || "Übersicht"; }
 
   return (
-    <div className="shell">
+    <div className={section === "partner" ? "shell shell-partner" : "shell"}>
       <aside className="sidebar">
         <div className="brand">
           <div><div className="brand-name">SHEWIUN</div><div className="brand-sub">AI AGENT AUTHORIZATION SECURITY</div></div>
