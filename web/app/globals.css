@@ -795,12 +795,10 @@ button:focus-visible,a:focus-visible{outline:3px solid #9bbcff;outline-offset:3p
 .shell-partner .content{max-width:1720px}
 .shell-partner .page-heading{display:flex}
 @media(max-width:1250px){
-  .sp-architecture-flow{grid-template-columns:1fr 16px 1fr 16px 1fr}
-  .sp-architecture-flow>article:nth-of-type(4){grid-column:1}
-  .sp-architecture-flow>article:nth-of-type(5){grid-column:3}
-  .sp-architecture-flow>article:nth-of-type(4),.sp-architecture-flow>article:nth-of-type(5){margin-top:8px}
-  .sp-architecture-flow>b:nth-of-type(3){grid-column:2}
-  .sp-architecture-flow>b:nth-of-type(4){grid-column:4}
+  .sp-architecture-flow{grid-template-columns:1fr;gap:6px}
+  .sp-architecture-flow>b{transform:rotate(90deg);height:18px}
+  .sp-architecture-flow>article:nth-of-type(4),.sp-architecture-flow>article:nth-of-type(5){grid-column:auto;margin-top:0}
+  .sp-architecture-flow>b:nth-of-type(3),.sp-architecture-flow>b:nth-of-type(4){grid-column:auto}
 }
 @media(max-width:1050px){
   .shell-partner .content{padding-left:24px;padding-right:24px}
