@@ -345,178 +345,165 @@ export default function Home() {
             <div className="heading-actions"><button className="button button-secondary" onClick={loadData}><span>↻</span> Aktualisieren</button><button className="button button-primary" onClick={() => setSection("graph")}>Autoritätsgraph öffnen <Icon name="arrow" /></button></div>
           </div>
 
-          {section === "partner" && <div className="partner-demo">
-            <section className="partner-hero">
-              <div className="partner-hero-copy">
-                <div className="partner-eyebrow"><span className="partner-eyebrow-dot" /> PARTNER DEMO · BANKING, FINTECH & REGULATED AI</div>
-                <h2>Ihr baut den Agenten.<br/><em>Wir prüfen seine Geschäftsautorität.</em></h2>
-                <p className="partner-hero-lead">S-PRO entwickelt AI-Agenten und Finanzsoftware für Banken, Private Banking, Wealth Manager und Fintechs. SHEWIUN ergänzt diese Projekte um eine unabhängige Autorisierungs- und Security-Assurance-Schicht: Welche konkrete Aktion darf ein Agent mit welcher Identität, für welchen Kunden, auf welcher Ressource und unter welchen Bedingungen ausführen?</p>
-                <p className="partner-hero-sub">Kein Ersatz für S-PROs Agenten, IAM, bestehende Human-in-the-loop-Prozesse oder Audit Trails. Eine zusätzliche Kontrollschicht an der geschäftskritischen Aktionsgrenze.</p>
-                <div className="partner-hero-actions">
-                  <button className="button button-light" onClick={() => setSection("assessment")}>M2.7 Assessment ansehen <Icon name="arrow" /></button>
-                  <button className="button button-outline-light" onClick={() => setSection("graph")}>Business Authority Graph</button>
+          {section === "partner" && <div className="partner-page">
+            <header className="sp-header">
+              <div className="sp-brand">SHEWIUN <span>Partnergespräch · S-PRO</span></div>
+              <nav aria-label="Demo Navigation">
+                <a href="#sp-value">Zusammenarbeit</a>
+                <a href="#sp-cases">Anwendungsfälle</a>
+                <a href="#sp-live">Live-Beispiel</a>
+                <a href="#sp-pilot">Pilot</a>
+              </nav>
+            </header>
+
+            <section className="sp-hero">
+              <div className="sp-hero-main">
+                <div className="sp-kicker">S-PRO × SHEWIUN · BANKING & FINTECH</div>
+                <h2>Sie bauen die Agenten.<br/><span>Wir prüfen, was sie auslösen dürfen.</span></h2>
+                <p>S-PRO entwickelt KI-Agenten und integriert sie in die Systeme von Banken und Fintechs. SHEWIUN kann diese Projekte um eine zusätzliche Prüfung ergänzen: Darf dieser Agent genau diese Geschäftsaktion mit dieser Identität, für diesen Kunden und unter diesen Bedingungen ausführen?</p>
+                <div className="sp-hero-actions">
+                  <a className="sp-button sp-button-primary" href="#sp-live">Live-Beispiel ansehen</a>
+                  <a className="sp-button sp-button-secondary" href="#sp-pilot">Pilotansatz besprechen</a>
                 </div>
-                <div className="partner-hero-caption">Synthetische Bankumgebung · Sandbox-only · Keine produktive Transaktion oder Kundenintegration</div>
+                <div className="sp-caption">Demonstrator mit synthetischen Daten · keine produktive Kundenanbindung</div>
               </div>
-              <div className="partner-hero-card">
-                <div className="partner-card-top"><span>COMPLEMENTARY DELIVERY MODEL</span><Badge tone="good">DESIGN PROPOSAL</Badge></div>
-                <div className="partner-stack">
-                  <div className="partner-stack-row"><span className="partner-stack-index">01</span><div><strong>S-PRO · Build & integrate</strong><small>AI agents · domain workflows · APIs · core systems</small></div><b>BUILD</b></div>
-                  <div className="partner-stack-connector"><i /></div>
-                  <div className="partner-stack-row partner-stack-highlight"><span className="partner-stack-index">02</span><div><strong>SHEWIUN · Authorize & assure</strong><small>Business authority · policy contracts · assessment · evidence</small></div><b>CONTROL</b></div>
-                  <div className="partner-stack-connector"><i /></div>
-                  <div className="partner-stack-row"><span className="partner-stack-index">03</span><div><strong>Customer-owned systems</strong><small>Core banking · KYC / AML · payment APIs · CRM</small></div><b>EXECUTE</b></div>
+              <aside className="sp-hero-summary">
+                <div className="sp-summary-title">Mögliche Aufgabenteilung</div>
+                <div className="sp-summary-row"><span> S-PRO </span><div><strong>Entwickeln & integrieren</strong><small>Agenten · Daten · Workflows · Kundensysteme</small></div></div>
+                <div className="sp-summary-row"><span> SHEWIUN </span><div><strong>Autorisierung prüfen</strong><small>Geschäftsrechte · Grenzen · Tests · Nachweise</small></div></div>
+                <div className="sp-summary-row"><span> KUNDE </span><div><strong>Kontrolle behalten</strong><small>Policies · Freigaben · Systemverantwortung</small></div></div>
+              </aside>
+            </section>
+
+            <section className="sp-value-section" id="sp-value">
+              <div className="sp-section-heading">
+                <div><div className="sp-kicker">WARUM DAS ZUSAMMENPASST</div><h3>Keine zweite Agentenplattform. Eine zusätzliche Kontrollebene.</h3></div>
+                <p>S-PRO behält die Verantwortung für Agentenentwicklung und Kundenintegration. SHEWIUN konzentriert sich auf eine andere Frage: Welche geschäftliche Befugnis hat der Agent tatsächlich?</p>
+              </div>
+              <div className="sp-two-columns">
+                <article>
+                  <div className="sp-column-label">WAS S-PRO BEREITS LIEFERT</div>
+                  <h4>Agenten, die in Finanzprozesse eingebettet sind</h4>
+                  <p>Nach den veröffentlichten S-PRO-Angeboten umfasst das unter anderem KYC und Onboarding, periodische Kundenprüfungen, AML-Alert-Triage, Kreditdossiers, Kundenservice und Wissenssuche. S-PRO beschreibt ausserdem Evaluierungen, menschliche Freigaben und Audit-Protokollierung als Teil des Ansatzes.</p>
+                  <a href="https://s-pro.io/de/blog/agentic-banking-anwendungsfalle" target="_blank" rel="noreferrer">S-PRO: Agentic Banking – Anwendungsfälle ↗</a>
+                </article>
+                <article className="sp-column-shewiun">
+                  <div className="sp-column-label">WAS SHEWIUN ERGÄNZEN KANN</div>
+                  <h4>Geschäftsautorität ausdrücklich festlegen und testen</h4>
+                  <p>Wir modellieren, wer einem Agenten welche Rechte übertragen darf, auf welche Ressource sie gelten, welche Parameter erlaubt sind und wann eine Freigabe nötig ist. Anschliessend testen wir, ob die definierten Grenzen eingehalten werden.</p>
+                  <span className="sp-note">Die Ergänzung ist besonders interessant, wenn mehrere Tools, APIs oder Agenten gemeinsam eine geschäftskritische Aktion ermöglichen.</span>
+                </article>
+              </div>
+              <div className="sp-value-line"><strong>Der praktische Nutzen für S-PRO:</strong> ein zusätzlicher, klar abgrenzbarer Assessment- und Integrationsbaustein für Kundenprojekte – ohne S-PROs bestehende Agenten, Architektur oder Freigabeprozesse zu ersetzen.</div>
+            </section>
+
+            <section className="sp-section" id="sp-cases">
+              <div className="sp-section-heading">
+                <div><div className="sp-kicker">ANWENDUNGSFÄLLE AUS DEM S-PRO-UMFELD</div><h3>Wo SHEWIUN einen konkreten Beitrag leisten kann</h3></div>
+                <p>Die Beispiele orientieren sich an S-PROs veröffentlichten Banking-, AML- und Wealth-Management-Anwendungsfällen. Sie sind mögliche gemeinsame Pilotfelder, keine bereits bestehenden Kundenintegrationen.</p>
+              </div>
+              <div className="sp-case-table-wrap">
+                <table className="sp-case-table">
+                  <thead><tr><th>Use Case</th><th>Was der Agent vorbereitet</th><th>Geschäftskritische Grenze</th><th>Beitrag von SHEWIUN</th></tr></thead>
+                  <tbody>
+                    <tr><td><strong>AML-Alert-Triage</strong><small>Bank · Compliance</small></td><td>Alert-Kontext sammeln, Treffer vergleichen, Fallnotiz und Empfehlung erstellen.</td><td>Fall schliessen, eskalieren oder eine Meldung auslösen.</td><td>Prüfen, ob die finale Aktion an Fall, Rolle und menschliche Entscheidung gebunden ist.</td></tr>
+                    <tr><td><strong>KYC & Periodic Review</strong><small>Bank · Wealth Manager</small></td><td>Dokumente auswerten, Daten abgleichen, Review-Entwurf vorbereiten.</td><td>KYC-Status ändern, Kundenrisiko neu einstufen oder Onboarding abschliessen.</td><td>Rechte für Lesen, Entwurf und finale Statusänderung getrennt modellieren und testen.</td></tr>
+                    <tr><td><strong>Credit Memo</strong><small>Bank · Lending</small></td><td>Unterlagen extrahieren, Kennzahlen berechnen, Kreditmemo entwerfen.</td><td>Kredit genehmigen, Limit setzen oder Konditionen verändern.</td><td>Prüfen, ob eine Analyseberechtigung versehentlich zur Kreditentscheidung führt.</td></tr>
+                    <tr><td><strong>Relationship Manager Copilot</strong><small>Private Banking · Asset Management</small></td><td>Call Briefing, Portfolio-Kontext und Research zusammenstellen.</td><td>Order platzieren oder Portfolio- und Kundendaten verändern.</td><td>Mandat, Portfolio, Instrument, Transaktionsparameter und Freigabe zusammen prüfen.</td></tr>
+                    <tr><td><strong>Customer Support & Refunds</strong><small>Neobroker · Fintech</small></td><td>Ticket beantworten, Kontostatus erklären, Refund vorbereiten.</td><td>Refund ausführen, Betrag erhöhen oder Empfänger ändern.</td><td>Prüfen, ob eine Freigabe tatsächlich an Kunde, Refund, Betrag und Empfänger gebunden ist.</td></tr>
+                    <tr><td><strong>Interne Wissenssuche</strong><small>Bank · Operations</small></td><td>Interne Richtlinien suchen und eine quellenbezogene Antwort erstellen.</td><td>Geschützte Informationen ausserhalb der Nutzerrolle offenlegen oder eine Policy-Änderung auslösen.</td><td>Ressourcen- und Daten-Scope zusammen mit der tatsächlichen Nutzer- und Agentenidentität prüfen.</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div className="sp-source-links">
+                <span>Weiterführende S-PRO-Beispiele:</span>
+                <a href="https://s-pro.io/ai-agents-aml-transaction-monitoring-bank/" target="_blank" rel="noreferrer">AML & Transaction Monitoring ↗</a>
+                <a href="https://s-pro.io/ai-for-wealth-and-asset-managers/" target="_blank" rel="noreferrer">Wealth & Asset Management ↗</a>
+              </div>
+            </section>
+
+            <section className="sp-section sp-live-section" id="sp-live">
+              <div className="sp-section-heading">
+                <div><div className="sp-kicker">LIVE IN DIESEM DEMO</div><h3>Ein Agent erhält nur einen Teil der CFO-Vollmacht</h3></div>
+                <p>Das Beispiel zeigt eine echte serverseitige Policy-Auswertung in der Shewiun-Demo-API. Es wird kein Geld überwiesen.</p>
+              </div>
+              <div className="sp-live-layout">
+                <div className="sp-authority-card">
+                  <div className="sp-live-label">BEISPIEL · ALPENBANK DEMO AG</div>
+                  <h4>Von der Vollmacht zur Agentenbefugnis</h4>
+                  <div className="sp-authority-step"><span>Ursprüngliche Vollmacht</span><strong>CHF 100.000</strong><small>Anna Müller · CFO</small></div>
+                  <div className="sp-authority-arrow">↓ Delegation eines begrenzten Teilrechts</div>
+                  <div className="sp-authority-step sp-authority-effective"><span>Agentenlimit</span><strong>CHF 10.000</strong><small>Zahlungsagent 01 · Konto •••• 1001</small></div>
+                  <ul><li>Erlaubt: <code>payment.create</code></li><li>Nicht delegiert: <code>payment.approve</code></li><li>Zusätzliche Freigabe: ab CHF 7.500 laut Demo-Policy</li></ul>
                 </div>
-                <div className="partner-stack-foot"><span>Agent proposes</span><strong>Policy decides · protected API enforces</strong></div>
-              </div>
-            </section>
-
-            <section className="partner-proof-strip">
-              <article><small>01 · CONTRACT</small><strong>Define the intended authority</strong><span>Principal, action, resource, purpose, limits and approval conditions.</span></article>
-              <article><small>02 · CHALLENGE</small><strong>Test the boundary</strong><span>Identity, permissions, tool composition, scope and business parameters.</span></article>
-              <article><small>03 · EVIDENCE</small><strong>Show the decision path</strong><span>Expected vs observed, decision IDs, policy version and evidence export.</span></article>
-              <article><small>04 · RETEST</small><strong>Verify the correction</strong><span>Replay the same controlled cases after remediation.</span></article>
-            </section>
-
-            <section className="partner-thesis">
-              <div className="partner-section-intro"><div className="panel-kicker">WHY THIS HELPS S-PRO</div><h3>From AI delivery<br/>to controlled AI delivery.</h3></div>
-              <div className="partner-thesis-copy">
-                <p>S-PRO already delivers agents with evaluations, audit trails and human approval workflows. SHEWIUN is designed to complement that foundation by making the authorization boundary explicit, testable and independent of the model output.</p>
-                <p><strong>The distinction:</strong> a role, permission or tool may allow a technical call. An Authorization Contract tests whether that call, in this context, may reach this business action — for this tenant, customer, account, amount and approval state.</p>
-                <p>That gives S-PRO a potential additional workstream to attach to suitable projects: pre-production authorization assessment, integration at the final action boundary, and repeatable assurance when agents, tools, policies or models change.</p>
-              </div>
-            </section>
-
-            <section className="panel partner-live-panel">
-              <div className="panel-header"><div><div className="panel-kicker">LIVE WALKTHROUGH · IMPLEMENTED SANDBOX</div><h2>Payment agent: delegated authority in action</h2><p>Ein durchgängiger Use Case, der in dieser Demo tatsächlich mit der SHEWIUN-Sandbox-API getestet wird.</p></div><Badge tone="good">LIVE IN THIS DEMO</Badge></div>
-              <div className="partner-live-grid">
-                <div className="partner-live-context">
-                  <div className="partner-live-context-title">SYNTHETIC BUSINESS CONTEXT</div>
-                  <h3>Alpenbank Demo AG</h3>
-                  <p>Anna Müller · CFO delegiert eine begrenzte Teilvollmacht an einen Zahlungsagenten.</p>
-                  <div className="partner-limit-comparison">
-                    <div><small>ORIGINAL AUTHORITY</small><strong>CHF 100.000</strong><span>CFO · Ursprungsvollmacht</span></div>
-                    <div className="partner-limit-arrow">→</div>
-                    <div className="partner-limit-effective"><small>DELEGATED AUTHORITY</small><strong>CHF 10.000</strong><span>Agent · effektives Limit</span></div>
-                  </div>
-                  <div className="partner-live-rules">
-                    <div><span>Ressource</span><strong>Geschäftskonto · •••• 1001</strong></div>
-                    <div><span>Erlaubte Aktion</span><strong><code>payment.create</code></strong></div>
-                    <div><span>Weiterdelegation</span><Badge tone="bad">NICHT ERLAUBT</Badge></div>
-                    <div><span>Zusatzfreigabe</span><strong>Ab CHF 7.500 · Demo-Policy</strong></div>
-                  </div>
-                </div>
-                <div className="partner-live-run">
-                  <div className="partner-live-context-title">TRY IT · SANDBOX ONLY</div>
-                  <h3>Was darf der Agent ausführen?</h3>
-                  <p>Die API prüft die Vollmacht serverseitig vor dem Anlegen eines Sandbox-Datensatzes. Es wird kein Geld bewegt.</p>
-                  <div className="partner-run-case"><div><span className="partner-case-indicator allowed">ALLOW</span><div><strong>CHF 5.000 · innerhalb der Teilvollmacht</strong><small>Erwartung: erlaubt; synthetischer Datensatz wird angelegt.</small></div></div><button disabled={busy || apiState !== "verbunden"} className="button button-primary" onClick={() => runPayment(5000)}>Erlaubte Aktion testen <Icon name="arrow"/></button></div>
-                  <div className="partner-run-case"><div><span className="partner-case-indicator denied">DENY</span><div><strong>CHF 15.000 · oberhalb des Agentenlimits</strong><small>Erwartung: verweigert; kein Zahlungsdatensatz.</small></div></div><button disabled={busy || apiState !== "verbunden"} className="button button-danger" onClick={() => runPayment(15000)}>Blockierte Aktion testen <Icon name="arrow"/></button></div>
-                  {result && <div className={result.ok ? "result-box result-good" : "result-box result-bad"}><span>{result.ok ? "✓" : "!"}</span><div><strong>{result.ok ? "Sandbox-Aktion autorisiert" : "Sandbox-Aktion verweigert"}</strong><p>{result.text}</p></div></div>}
-                  <p className="partner-live-note">Der Live-Sandbox-Flow prüft Business Authority und Betrag. Die zusätzliche Policy-Konsole zeigt sieben weitere bzw. ergänzende Runtime-Kontrollen. Die Approval-Flags dort sind Testeingaben, keine kryptografisch signierte Freigabe.</p>
+                <div className="sp-live-test">
+                  <div className="sp-live-label">JETZT SELBST TESTEN · SANDBOX</div>
+                  <h4>Welche Zahlung darf der Agent anlegen?</h4>
+                  <p>Der Betrag wird gegen die delegierte Befugnis und die Demo-Policy geprüft. Bei einer Verweigerung darf kein Sandbox-Zahlungsdatensatz entstehen.</p>
+                  <div className="sp-test-row"><div><span className="sp-allow-tag">ALLOW erwartet</span><strong>CHF 5.000</strong><small>Innerhalb des delegierten Limits und unterhalb der zusätzlichen Freigabeschwelle.</small></div><button disabled={busy || apiState !== "verbunden"} className="button button-primary" onClick={() => runPayment(5000)}>Testen</button></div>
+                  <div className="sp-test-row"><div><span className="sp-deny-tag">DENY erwartet</span><strong>CHF 15.000</strong><small>Überschreitet das delegierte Agentenlimit von CHF 10.000.</small></div><button disabled={busy || apiState !== "verbunden"} className="button button-danger" onClick={() => runPayment(15000)}>Testen</button></div>
+                  {result && <div className={result.ok ? "result-box result-good" : "result-box result-bad"}><span>{result.ok ? "✓" : "!"}</span><div><strong>{result.ok ? "Aktion erlaubt" : "Aktion verweigert"}</strong><p>{result.text}</p></div></div>}
+                  <div className="sp-api-note">Backend-Status: {apiState === "verbunden" ? "verbunden" : apiState === "getrennt" ? "nicht erreichbar" : "wird geprüft"}. Die Tests schreiben ausschliesslich in die Demo-Sandbox.</div>
                 </div>
               </div>
             </section>
 
-            <section className="partner-usecase-section">
-              <div className="partner-section-heading"><div><div className="panel-kicker">MAPPED TO S-PRO'S PUBLISHED AGENT WORKFLOWS</div><h3>Use Cases, bei denen eine klare Autorisierungsgrenze zählt.</h3><p>Die ersten vier Szenarien orientieren sich an S-PROs öffentlich beschriebenen Agenten für AML, KYC, Client Support und Credit. Nur der Payment-Fall ist in dieser Demo live ausführbar.</p></div><Badge tone="warn">1 LIVE · 5 BLUEPRINTS</Badge></div>
-              <div className="partner-usecase-grid">
-                <article className="partner-usecase partner-usecase-featured">
-                  <div className="partner-usecase-top"><span>01 · AML / TRANSACTION MONITORING</span><Badge tone="warn">INTEGRATION BLUEPRINT</Badge></div>
-                  <h4>Transaction-monitoring triage agent</h4>
-                  <p>Der Agent übernimmt Alert-Kontext, sammelt relevante Konto- und Gegenparteidaten und erstellt eine Case Narrative mit einer Empfehlung. SHEWIUN würde den Übergang von Analyse zu geschäftlicher Fallentscheidung als eigene Autorisierungsgrenze prüfen.</p>
-                  <div className="partner-usecase-columns"><div><small>AGENT MAY</small><span>Alert lesen · zugeordneten Case-Kontext abrufen · Narrative entwerfen</span></div><div><small>HUMAN / POLICY GATE</small><span>Case schliessen · eskalieren · regulatorische Meldung einreichen</span></div></div>
-                  <div className="partner-usecase-example"><strong>Testidee</strong><span>Kann ein Agent mit read + draft capabilities einen Case trotzdem final schliessen? Erwartung: DENY bis zu einer expliziten, rollen- und fallgebundenen Entscheidung.</span></div>
-                  <button className="text-button" onClick={() => setSection("assessment")}>M2.7 Assessment-Methode ansehen <Icon name="arrow"/></button>
-                </article>
-                <article className="partner-usecase">
-                  <div className="partner-usecase-top"><span>02 · KYC / PERIODIC REVIEW</span><Badge tone="warn">INTEGRATION BLUEPRINT</Badge></div>
-                  <h4>Client onboarding & review agent</h4>
-                  <p>Der Agent sammelt Dokumente, prüft Vollständigkeit, erstellt eine Source-linked Review und markiert offene Punkte.</p>
-                  <div className="partner-usecase-columns"><div><small>AGENT MAY</small><span>Dokumente lesen · Daten extrahieren · Review-Entwurf vorbereiten</span></div><div><small>HUMAN / POLICY GATE</small><span>KYC freigeben · Risikoklasse ändern · Onboarding abschliessen</span></div></div>
-                  <div className="partner-usecase-example"><strong>Testidee</strong><span>Ist eine technische update-Berechtigung ausreichend, um den finalen KYC-Status zu setzen? Contract verlangt eine autorisierte Person und den konkreten Kundenfall.</span></div>
-                </article>
-                <article className="partner-usecase">
-                  <div className="partner-usecase-top"><span>03 · CUSTOMER SUPPORT / REFUNDS</span><Badge tone="warn">INTEGRATION BLUEPRINT</Badge></div>
-                  <h4>Customer support & refund agent</h4>
-                  <p>Der Agent beantwortet Kundenanfragen auf Basis von Konto- und Policy-Kontext und bereitet einen Refund vor.</p>
-                  <div className="partner-usecase-columns"><div><small>AGENT MAY</small><span>Ticket lesen · Status erklären · Refund vorschlagen</span></div><div><small>HUMAN / POLICY GATE</small><span>Refund ausführen · Betrag erhöhen · Empfänger ändern</span></div></div>
-                  <div className="partner-usecase-example"><strong>Testidee</strong><span>Bindet eine Freigabe wirklich Refund-ID, Kunde, Betrag und Empfänger — oder wird ein Approval-Kontext wiederverwendet?</span></div>
-                </article>
-                <article className="partner-usecase">
-                  <div className="partner-usecase-top"><span>04 · CREDIT / LOMBARD</span><Badge tone="warn">INTEGRATION BLUEPRINT</Badge></div>
-                  <h4>Credit memo & lending agent</h4>
-                  <p>Der Agent extrahiert Unterlagen, berechnet Kennzahlen und erstellt ein Kreditmemo entlang der Bankrichtlinie.</p>
-                  <div className="partner-usecase-columns"><div><small>AGENT MAY</small><span>Unterlagen analysieren · Kennzahlen berechnen · Empfehlung entwerfen</span></div><div><small>HUMAN / POLICY GATE</small><span>Kredit genehmigen · Limit setzen · Konditionen ändern</span></div></div>
-                  <div className="partner-usecase-example"><strong>Testidee</strong><span>Kann eine Empfehlung über die finale Action API in eine Kreditentscheidung umgewandelt werden? Erwartung: deny ohne berechtigten Entscheider.</span></div>
-                </article>
-                <article className="partner-usecase">
-                  <div className="partner-usecase-top"><span>05 · WEALTH / RELATIONSHIP MANAGEMENT</span><Badge tone="warn">INTEGRATION BLUEPRINT</Badge></div>
-                  <h4>Relationship-manager & investment copilot</h4>
-                  <p>Der Agent bereitet Kundenbriefings, Portfolio-Fragen und Research-Notizen vor und verbindet Kundendaten mit genehmigten Marktinformationen.</p>
-                  <div className="partner-usecase-columns"><div><small>AGENT MAY</small><span>Portfolio lesen · Briefing entwerfen · Research zusammenfassen</span></div><div><small>HUMAN / POLICY GATE</small><span>Order platzieren · Portfolio-Allokation ändern · Anlageentscheidung auslösen</span></div></div>
-                  <div className="partner-usecase-example"><strong>Testidee</strong><span>Eine gültige Leseberechtigung wird nicht zu einer Handelsvollmacht. Jede Order muss an Mandat, Instrument, Portfolio, Parameter und Freigabe gebunden sein.</span></div>
-                </article>
-                <article className="partner-usecase">
-                  <div className="partner-usecase-top"><span>05 · DIGITAL BANKING / TREASURY</span><Badge tone="good">LIVE PAYMENT SANDBOX</Badge></div>
-                  <h4>Business payments & multi-entity approvals</h4>
-                  <p>Der Agent bereitet eine Zahlung vor. Die bestehende Sandbox zeigt, wie eine delegierte Vollmacht, ein konkreter Account-Scope und ein Limit vor der Mutation ausgewertet werden.</p>
-                  <div className="partner-usecase-columns"><div><small>AGENT MAY</small><span>Zahlung innerhalb der übertragenen CHF-10.000-Grenze anlegen</span></div><div><small>HUMAN / POLICY GATE</small><span>Über Limit · andere Gesellschaft · nicht delegierte Aktion</span></div></div>
-                  <div className="partner-usecase-example"><strong>Testidee</strong><span>CHF 15.000 angefordert bei CHF 10.000 Delegationslimit. Erwartung: DENY und kein Payment-Datensatz.</span></div>
-                  <button className="text-button" onClick={() => setSection("uebersicht")}>Bestehende Sandbox-Übersicht öffnen <Icon name="arrow"/></button>
-                </article>
+            <section className="sp-section" id="sp-difference">
+              <div className="sp-section-heading">
+                <div><div className="sp-kicker">DIE DIFFERENZIERUNG</div><h3>Berechtigung ist nicht dasselbe wie Geschäftsautorität</h3></div>
+                <p>Ein Agent kann technisch auf mehrere Tools zugreifen. Entscheidend ist, welche Wirkung diese Tools zusammen ermöglichen.</p>
+              </div>
+              <div className="sp-difference-grid">
+                <article><div className="sp-column-label">TECHNISCHER ZUGRIFF</div><h4>Was kann aufgerufen werden?</h4><p>Ein Agent besitzt eine gültige Identität, eine Rolle und Berechtigungen für einzelne Tools oder APIs.</p><ul><li>customer.read</li><li>beneficiary.update</li><li>payment.create</li></ul></article>
+                <article className="sp-difference-emphasis"><div className="sp-column-label">SHEWIUN · BUSINESS AUTHORITY</div><h4>Was darf dadurch tatsächlich passieren?</h4><p>Wir verknüpfen Identität, Auftraggeber, Delegation, Kunde/Konto, Geschäftszweck, Parameter, Limit und Freigabe zu einer überprüfbaren Regel.</p><ul><li>Wer handelt – und in wessen Auftrag?</li><li>Für welchen Kunden und welches Konto?</li><li>Welche Aktion und welcher Betrag?</li><li>Welche Freigabe muss vorliegen?</li></ul></article>
+              </div>
+              <div className="sp-process">
+                <div><span>1</span><strong>Agent fordert Aktion an</strong><small>z. B. Zahlung anlegen</small></div><b>→</b>
+                <div><span>2</span><strong>Contract wird geprüft</strong><small>Identität · Scope · Zweck · Limits</small></div><b>→</b>
+                <div><span>3</span><strong>Entscheidung</strong><small>ALLOW oder DENY</small></div><b>→</b>
+                <div><span>4</span><strong>API setzt Grenze durch</strong><small>Nur nach gültigem ALLOW</small></div><b>→</b>
+                <div><span>5</span><strong>Nachweis bleibt erhalten</strong><small>Decision ID · Policy · Ergebnis</small></div>
               </div>
             </section>
 
-            <section className="panel partner-differentiation">
-              <div className="panel-header"><div><div className="panel-kicker">WHAT SHEWIUN ADDS · AGENTPROOF + BUSINESS AUTHORITY</div><h2>Security Assessment ist mehr als ein Berechtigungs-Check.</h2><p>Die AgentProof-Methodik verbindet einen definierten Authorization Contract mit kontrollierten Tests, Runtime-Evidence, Findings und exaktem Retest.</p></div><Badge tone="good">CURRENT ENGINE + CONTROLLED LIMITS</Badge></div>
-              <div className="partner-capability-grid">
-                <article><span>01</span><strong>Business Authority Graph</strong><p>Wer darf wem welche Teilvollmacht für welche Ressource, Aktion, Grenze und Laufzeit übertragen? Delegation kann Rechte reduzieren, nie erweitern.</p><small>IN DEMO IMPLEMENTIERT</small></article>
-                <article><span>02</span><strong>Authorization Contracts</strong><p>Erwartete Regeln maschinenlesbar definieren: Actor, action, resource / data scope, purpose, parameters, amount limit und approval condition.</p><small>POLICY-LEVEL ENGINE</small></article>
-                <article><span>03</span><strong>Runtime Policy Decision</strong><p>Deterministische sieben Kontrollgruppen; LLM-Ausgabe ist nicht die Autorisierungsinstanz. Fail-closed Entscheidung vor der Sandbox-Mutation.</p><small>IN DEMO IMPLEMENTIERT</small></article>
-                <article><span>04</span><strong>M2.7 Assessment</strong><p>40 Lite- bzw. 67 Continuous-Testfälle mit positiven Kontrollen, Grenzwerten, Identität, Scope, Purpose, Permission und Komposition.</p><small>POLICY REQUESTS · KEIN LIVE RED TEAM</small></article>
-                <article><span>05</span><strong>Evidence & Findings</strong><p>Decision ID, Correlation ID, Policy-Version, einzelne Checks, Hash-verknüpfte Audit-Ereignisse und JSON-Export machen Ergebnisse prüfbar.</p><small>DEMO EVIDENCE</small></article>
-                <article><span>06</span><strong>AgentProof Runtime Analysis</strong><p>Agent-Manifeste und bereitgestellte Runtime-Event-Ketten können gegen einen Contract geprüft werden; SHA-256 Evidence Hash, mögliche Kontrollabweichungen und Remediation werden strukturiert.</p><small>SEPARATE ENGINE / INTEGRATION TARGET</small></article>
-                <article><span>07</span><strong>Authenticated Agent Discovery</strong><p>AgentProof unterstützt explizit autorisierte HTTPS-Discovery für Sandbox-/Non-Production-Agenten und prüft die Authentisierung am Identity Endpoint.</p><small>AGENTPROOF PLATFORM CAPABILITY</small></article>
-                <article><span>08</span><strong>Exact Retest</strong><p>Dieselben definierten Tests nach der Korrektur erneut ausführen. Ein Fix wird gegen die ursprüngliche Erwartung geprüft statt nur als erledigt markiert.</p><small>POLICY-LEVEL RETEST</small></article>
-                <article><span>09</span><strong>Adversarial Hypothesis Planner</strong><p>Der optionale AgentProof-Planer kann aus einem validierten Non-production-Scope nicht-destruktive Angriffshypothesen und Guardrails ableiten. Eine Hypothese ist kein ausgeführter Angriff.</p><small>AGENTPROOF · CONFIGURATION REQUIRED</small></article>
-                <article><span>10</span><strong>Workspace & Role Governance</strong><p>Die separate AgentProof-Plattform enthält authentifizierte Organisations-Workspaces, Mitgliedschaften und rollenbasierte Assessment-Berechtigungen.</p><small>AGENTPROOF PLATFORM · NOT IN THIS DEMO</small></article>
+            <section className="sp-section">
+              <div className="sp-section-heading">
+                <div><div className="sp-kicker">SHEWIUN & AGENTPROOF</div><h3>Was heute vorhanden ist – und was gemeinsam integriert würde</h3></div>
+                <p>Wir trennen bewusst zwischen dem, was dieser Demonstrator bereits zeigt, und Funktionen aus AgentProof bzw. einer späteren Kundenintegration.</p>
               </div>
-              <p className="partner-claim-note">Wichtig: Im aktuellen Partner-Demonstrator ist nur der Payment-Sandbox-Flow direkt mit der Business-Authority-API verbunden. AgentProofs Runtime-Analyse wertet bereitgestellte bzw. autorisiert erhobene Evidenz aus; sie behauptet keine autonome produktive Exploit-Ausführung. MCP-Runtime-Interception, signierte Einmalfreigaben, SSO/SCIM und produktive Tenant-Isolation sind Integrations- bzw. Ausbauarbeiten.</p>
+              <div className="sp-capability-table">
+                <div><strong>Business Authority Graph</strong><p>Modelliert Organisation, menschliche Vollmacht, Agenten-Delegation, Ressourcen, Aktionen und Limits.</p><span className="sp-status sp-status-live">Im Demo-Backend vorhanden</span></div>
+                <div><strong>Authorization Contract & Policy Decision</strong><p>Prüft Identität, Mandant, Auftraggeber, Tool/Permission, Geschäftszweck, Ressourcenumfang, Parameter und Freigabezustand.</p><span className="sp-status sp-status-live">Im Demo-Backend vorhanden</span></div>
+                <div><strong>M2.7 Assessment</strong><p>40 Lite- und 67 Continuous-Testfälle vergleichen erwartete mit serverseitig beobachteten Policy-Entscheidungen. Positive Kontrollen prüfen auch, dass erlaubte Aktionen möglich bleiben.</p><span className="sp-status sp-status-live">Policy-Level Tests im Demo</span></div>
+                <div><strong>Evidence & Findings</strong><p>Decision IDs, Policy-Version, einzelne Prüfpunkte und exportierbare Assessment-Ergebnisse. Die Aussagekraft bleibt auf die tatsächlich ausgeführten Testfälle begrenzt.</p><span className="sp-status sp-status-live">Im Demo vorhanden</span></div>
+                <div><strong>AgentProof Runtime Analysis</strong><p>Die separate AgentProof-Codebasis enthält Manifest-Analyse, Contract-Prüfung gegen bereitgestellte Runtime-Events, Finding-/Remediation-Struktur und SHA-256 Evidence Hashes.</p><span className="sp-status sp-status-separate">Separate Engine · noch nicht in diesen Flow integriert</span></div>
+                <div><strong>Agent discovery & adversarial planning</strong><p>AgentProof enthält authentifizierte Discovery für explizit autorisierte Non-production-Agenten sowie einen optionalen, nicht-destruktiven Hypothesenplaner.</p><span className="sp-status sp-status-separate">Separate Plattformfunktionen · Konfiguration nötig</span></div>
+                <div><strong>Produktive Durchsetzung bei S-PRO-Kunden</strong><p>Einbindung als Policy Decision Point mit Enforcement im geschützten API-Service oder MCP-Wrapper. Die echte Runtime-Ereignisquelle und die sichere Identitäts- und Freigabebindung würden wir gemeinsam definieren.</p><span className="sp-status sp-status-next">Gemeinsame Integrationsarbeit</span></div>
+              </div>
+              <p className="sp-limit-note">Wichtig: Die 40/67 Tests sind in diesem Demonstrator Policy-Tests – kein autonomer Penetrationstest. Die Approval-Felder sind Testeingaben, keine kryptografisch signierten Einmalfreigaben. Die produktive Integration in eine externe S-PRO-Runtime ist noch nicht Bestandteil dieser Demo.</p>
             </section>
 
-            <section className="partner-architecture">
-              <div className="partner-section-heading"><div><div className="panel-kicker">PROPOSED S-PRO + SHEWIUN ARCHITECTURE</div><h3>Keep the existing stack. Add one explicit decision point.</h3><p>Die genaue Einbindung wird je S-PRO-Projekt und Kundenarchitektur festgelegt.</p></div><Badge tone="warn">REFERENCE ARCHITECTURE</Badge></div>
-              <div className="partner-architecture-flow">
-                <article><small>01 · AGENT</small><strong>S-PRO agent / orchestrator</strong><span>Model, tools, workflow and customer context</span></article><b>→</b>
-                <article><small>02 · REQUEST</small><strong>Action contract</strong><span>Actor · tenant · purpose · resource · parameters</span></article><b>→</b>
-                <article className="partner-architecture-core"><small>03 · SHEWIUN PDP</small><strong>ALLOW / DENY</strong><span>Authority · policy · approval state · evidence</span></article><b>→</b>
-                <article><small>04 · PEP</small><strong>Protected API / MCP wrapper</strong><span>Enforce before the sensitive mutation</span></article><b>→</b>
-                <article><small>05 · SYSTEM OF RECORD</small><strong>Bank / fintech systems</strong><span>Execute only after a valid ALLOW</span></article>
+            <section className="sp-section" id="sp-pilot">
+              <div className="sp-section-heading">
+                <div><div className="sp-kicker">VORSCHLAG FÜR DIE ZUSAMMENARBEIT</div><h3>Mit einem klar begrenzten Kunden-Use-Case starten</h3></div>
+                <p>Kein Plattformwechsel und kein Zugriff auf ein ganzes Banksystem. Wir würden zuerst den einen Workflow auswählen, bei dem die Autorisierungsgrenze am wichtigsten ist.</p>
               </div>
-              <div className="partner-architecture-foot"><span>Decision and evidence can be forwarded to customer audit / SIEM processes.</span><strong>S-PRO keeps ownership of agent engineering and client delivery.</strong></div>
+              <div className="sp-pilot-steps">
+                <article><span>01</span><h4>Use Case auswählen</h4><p>Zum Beispiel AML-Alert-Triage, KYC-Statusänderung oder eine Refund-Freigabe.</p></article>
+                <article><span>02</span><h4>Authority Contract definieren</h4><p>Agent, Auftraggeber, Aktion, Kunde/Konto, Zweck, Parameter, Limit und notwendige Freigabe festhalten.</p></article>
+                <article><span>03</span><h4>Im Testsystem prüfen</h4><p>Erlaubte und verbotene Szenarien ausführen, Evidence sichern und konkrete Findings dokumentieren.</p></article>
+                <article><span>04</span><h4>Integration bewerten</h4><p>Gemeinsam entscheiden, ob SHEWIUN vor einer kritischen API-Aktion eingebunden wird und wie ein Retest abläuft.</p></article>
+              </div>
+              <div className="sp-next-call">
+                <div><strong>Was wir im nächsten Gespräch gemeinsam klären sollten</strong><p>Welcher bestehende S-PRO-Agent hat eine kritische Aktion? Welche Identitäts- und Runtime-Daten können im Non-production-System bereitgestellt werden? An welcher API oder welchem Tool lässt sich die Grenze sinnvoll prüfen?</p></div>
+                <div className="sp-next-question">Welcher Ihrer bestehenden Agenten wäre der beste Kandidat für einen ersten gemeinsamen Pilot?</div>
+              </div>
             </section>
 
-            <section className="panel partner-commercial">
-              <div className="panel-header"><div><div className="panel-kicker">PARTNER VALUE · A REPEATABLE OFFER</div><h2>Ein zusätzlicher, modularer Workstream für S-PRO-Projekte.</h2><p>Keine konkurrierende Agentenplattform. Ein möglicher gemeinsamer Angebotsbaustein für Kunden, bei denen Agenten kritische Geschäftszustände verändern dürfen.</p></div></div>
-              <div className="partner-commercial-grid">
-                <article><small>01 · PRE-PRODUCTION</small><strong>Authorization Design & Assessment</strong><p>Ein Workflow, ein Agent, ein expliziter Contract, definierte Allow-/Deny-Cases und ein nachvollziehbarer Ergebnisbericht.</p><b>Revenue opportunity: assessment / design workstream</b></article>
-                <article><small>02 · IMPLEMENTATION</small><strong>Runtime Enforcement Integration</strong><p>Gemeinsam den PDP/PEP-Punkt in API, Service Layer oder MCP-Wrapper platzieren. Kritische Mutationen müssen serverseitig geprüft werden.</p><b>Revenue opportunity: integration / engineering workstream</b></article>
-                <article><small>03 · CHANGE ASSURANCE</small><strong>Continuous Policy Regression</strong><p>Nach Änderungen an Modell, Prompt, Tool, Permission, Policy oder Workflow die gleichen und ergänzende Szenarien erneut prüfen.</p><b>Revenue opportunity: recurring assurance / maintenance</b></article>
-              </div>
-              <div className="partner-pilot"><div><small>PROPOSED DESIGN-PARTNER PILOT</small><strong>1 Kunde · 1 Agent · 1 kritischer Workflow · Non-production</strong><p>Gemeinsam Use Case auswählen, Scope festlegen, Contract definieren, Assessment durchführen und – falls sinnvoll – eine geschützte Aktionsgrenze integrieren und retesten.</p></div><button className="button button-primary" onClick={() => setSection("integrationen")}>Integrationsmodell ansehen <Icon name="arrow"/></button></div>
-            </section>
-
-            <section className="panel partner-demo-agenda">
-              <div className="panel-header"><div><div className="panel-kicker">30-MINUTE PARTNER DISCUSSION</div><h2>Vorschlag für den gemeinsamen nächsten Schritt</h2><p>Aus dem Demo-Call soll ein klar abgegrenzter Design-Partner-Use-Case hervorgehen.</p></div></div>
-              <div className="partner-agenda-grid">
-                <article><small>0–5 MIN</small><strong>S-PRO priorities</strong><span>Welche Agentenprojekte haben die kritischste Aktionsgrenze?</span></article>
-                <article><small>5–12 MIN</small><strong>One workflow</strong><span>AML triage, KYC review, refunds oder credit memo auswählen.</span></article>
-                <article><small>12–22 MIN</small><strong>Contract & evidence</strong><span>Ein konkretes Beispiel: erlaubte Aktion, verbotene Aktion, Evidence und Retest.</span></article>
-                <article><small>22–30 MIN</small><strong>Pilot design</strong><span>Owner, non-production access, integration point und messbares Ergebnis festlegen.</span></article>
-              </div>
-              <div className="partner-final-line"><strong>Die Frage an S-PRO:</strong><span>Welcher bestehende Agenten-Use-Case wäre der beste Kandidat, um eine solche unabhängige Authorization-Assurance-Schicht gemeinsam zu validieren?</span></div>
-            </section>
+            <footer className="sp-footer">
+              <span>SHEWIUN · Business Authority & Agent Authorization Assurance</span>
+              <span>Vorbereitete Partnerdiskussion · Synthetischer Demonstrator</span>
+            </footer>
           </div>}
 
           {section === "uebersicht" && <>
