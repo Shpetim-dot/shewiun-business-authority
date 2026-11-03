@@ -413,6 +413,7 @@ export default function Home() {
                     <tr><td><strong>Relationship Manager Copilot</strong><small>Private Banking · Asset Management</small></td><td>Call Briefing, Portfolio-Kontext und Research zusammenstellen.</td><td>Order platzieren oder Portfolio- und Kundendaten verändern.</td><td>Mandat, Portfolio, Instrument, Transaktionsparameter und Freigabe zusammen prüfen.</td></tr>
                     <tr><td><strong>Customer Support & Refunds</strong><small>Neobroker · Fintech</small></td><td>Ticket beantworten, Kontostatus erklären, Refund vorbereiten.</td><td>Refund ausführen, Betrag erhöhen oder Empfänger ändern.</td><td>Prüfen, ob eine Freigabe tatsächlich an Kunde, Refund, Betrag und Empfänger gebunden ist.</td></tr>
                     <tr><td><strong>Interne Wissenssuche</strong><small>Bank · Operations</small></td><td>Interne Richtlinien suchen und eine quellenbezogene Antwort erstellen.</td><td>Geschützte Informationen ausserhalb der Nutzerrolle offenlegen oder eine Policy-Änderung auslösen.</td><td>Ressourcen- und Daten-Scope zusammen mit der tatsächlichen Nutzer- und Agentenidentität prüfen.</td></tr>
+                    <tr><td><strong>Untrusted Documents & Prompt Injection</strong><small>KYC · AML · RM Copilot</small></td><td>Agent liest externe PDFs, E-Mails, Registerauszüge oder Freitextfelder.</td><td>Ein manipulierter Inhalt versucht, Tool-Aufrufe auszulösen, Daten-Scope zu erweitern oder fremde Kundendaten offenzulegen.</td><td>SHEWIUN prüft den nachgelagerten Tool-Aufruf gegen Contract und Scope. Prompt- und Datenabwehr bleibt eine zusätzliche S-PRO-Kontrollschicht.</td></tr>
                   </tbody>
                 </table>
               </div>
@@ -512,7 +513,7 @@ export default function Home() {
                   <code>audit / SIEM</code>
                 </article>
               </div>
-              <div className="sp-architecture-caption"><strong>Wichtige Unterscheidung:</strong> Das PDP trifft die Policy-Entscheidung. Der PEP erzwingt sie an der Stelle, an der der API-Aufruf tatsächlich ausgeführt wird. Eine Anzeige im Dashboard allein wäre keine Sicherheitskontrolle.</div>
+              <div className="sp-architecture-caption"><strong>Wichtige Unterscheidung:</strong> Das PDP trifft die Policy-Entscheidung. Der PEP erzwingt sie an der Stelle, an der der API-Aufruf tatsächlich ausgeführt wird. Eine Anzeige im Dashboard allein wäre keine Sicherheitskontrolle. <strong>Prompt-Injection-Grenze:</strong> SHEWIUN erkennt oder neutralisiert keine manipulierten Dokumente und bewertet nicht die Modellantwort. Es prüft die daraus resultierende Aktion gegen die Geschäftsautorität. Eine schädliche Aktion, die innerhalb aller gewährten Rechte liegt, braucht weiterhin die zusätzlichen Modell-, Daten- und Prozesskontrollen von S-PRO.</div>
 
               <div className="sp-contract-layout">
                 <article className="sp-code-card">
@@ -583,6 +584,13 @@ export default function Home() {
               <div className="sp-pilot-deliverables">
                 <div><span>ERGEBNISSE DES PILOT-SCOPES</span><strong>Was S-PRO und der Kunde erhalten</strong></div>
                 <ul><li>Abgestimmte Action- und Authority-Matrix</li><li>Versionierter Authorization Contract</li><li>Reproduzierbare ALLOW/DENY-Testfälle inklusive Positivkontrollen</li><li>Findings mit Decision-Kontext und nachvollziehbaren Prüfergebnissen</li><li>Integrationsskizze mit Identitäts-, Approval- und Enforcement-Grenzen</li></ul>
+              </div>
+              <div className="sp-acceptance">
+                <strong>Vorgeschlagene Abnahmekriterien – gemeinsam festzulegen</strong>
+                <div><span>01</span> Legitime Referenzaktionen werden weiterhin erlaubt.</div>
+                <div><span>02</span> Falscher Mandant, Agent, Auftraggeber, Ressource, Zweck oder Parameter führt zur erwarteten Ablehnung.</div>
+                <div><span>03</span> Eine Ablehnung erzeugt keinen Side Effect im geschützten Testsystem.</div>
+                <div><span>04</span> Jede Entscheidung ist über Decision ID, Correlation ID und Policy-Version rekonstruierbar.</div>
               </div>
               <div className="sp-next-call">
                 <div><strong>Was wir im nächsten Gespräch gemeinsam klären sollten</strong><p>Welcher bestehende S-PRO-Agent hat eine kritische Aktion? Welche Identitäts- und Runtime-Daten können im Non-production-System bereitgestellt werden? An welcher API oder welchem Tool lässt sich die Grenze sinnvoll prüfen?</p></div>
