@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "SHEWIUN | Business Authority",
-  description: "Geschäftliche Vollmachten und Laufzeit-Autorisierung für KI-Agenten.",
+  title: "SHEWIUN | S-PRO Partner Demo",
+  description: "Business Authority, Authorization Contracts and AI-agent security assurance for banking and fintech workflows.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
