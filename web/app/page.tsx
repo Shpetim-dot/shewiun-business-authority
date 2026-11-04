@@ -335,7 +335,7 @@ export default function Home() {
   }
   function exportAssessmentReport(){
     if(!assessmentResults.length)return;
-    const report={product:"SHEWIUN",report_type:"M2.7 Authorization Assessment",profile:assessmentProfile,generated_at:assessmentTimestamp,claim_level:"policy-evaluation",runtime_execution_observed:false,summary:{total:assessmentResults.length,matched:assessmentResults.filter(x=>x.matched).length,deviations:assessmentResults.filter(x=>!x.matched).length,unexpected_allows:assessmentResults.filter(x=>x.expected==="DENY"&&x.actual==="ALLOW").length},results:assessmentResults,limitations:["Demo-Inputs sind keine kryptografisch attestierte Runtime-Identität.","Approval-Flags sind keine signierten, einmalig verwendbaren Approval-Capabilities.","Replay-Test beobachtet wiederholte PDP-Entscheidungen; er beweist keine Replay-Abwehr.","Keine externe Agenten-Runtime oder produktive Business-API wurde ausgeführt."]};
+    const report={product:"SHEWIUN",report_type:"M2.7 Authorization Assessment",profile:assessmentProfile,generated_at:assessmentTimestamp,claim_level:"policy-evaluation",runtime_execution_observed:false,summary:{total:assessmentResults.length,matched:assessmentResults.filter(x=>x.matched).length,deviations:assessmentResults.filter(x=>!x.matched).length,unexpected_allows:assessmentResults.filter(x=>x.expected==="DENY"&&x.actual==="ALLOW").length},results:assessmentResults,limitations:["Demo inputs are not cryptographically attested runtime identities.","Approval flags are not signed, single-use approval capabilities.","The replay test observes repeated PDP decisions; it does not prove replay protection.","No external agent runtime or production business API was executed."]};
     const blob=new Blob([JSON.stringify(report,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),link=document.createElement("a");
     link.href=url;link.download="shewiun-assessment-"+assessmentProfile+"-"+new Date().toISOString().slice(0,10)+".json";link.click();URL.revokeObjectURL(url);
   }
@@ -410,8 +410,11 @@ export default function Home() {
                 <a href="#sp-live">Live demo</a>
                 <a href="#sp-architecture">Architecture</a>
                 <a href="#sp-threats">CISO view</a>
-                <a href="#sp-ciso-backlog">Hardening backlog</a>
+                <a href="#sp-ciso-backlog">CISO backlog</a>
                 <a href="#sp-agentproof">AgentProof</a>
+                <a href="#sp-evidence-model">Evidence model</a>
+                <a href="#sp-gates">S-PRO gates</a>
+                <a href="#sp-cfa">CFA platform</a>
                 <a href="#sp-pilot">Pilot</a>
               </nav>
             </header>
@@ -479,11 +482,13 @@ export default function Home() {
               <div className="sp-source-links">
                 <span>Relevant S-PRO references:</span>
                 <a href="https://s-pro.io/" target="_blank" rel="noreferrer">Financial-services portfolio ↗</a>
+                <a href="https://s-pro.io/blog/agentic-banking" target="_blank" rel="noreferrer">Agentic banking use cases ↗</a>
                 <a href="https://s-pro.io/ai-agents-aml-transaction-monitoring-bank/" target="_blank" rel="noreferrer">AML & transaction monitoring ↗</a>
                 <a href="https://s-pro.io/ai-for-wealth-and-asset-managers/" target="_blank" rel="noreferrer">Wealth management ↗</a>
-                <a href="https://s-pro.io/ai-agent-production-gates-bank" target="_blank" rel="noreferrer">S-PRO’s six production gates ↗</a>
-                <a href="https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/" target="_blank" rel="noreferrer">OWASP Agentic Top 10 ↗</a>
+                <a href="https://s-pro.io/blog/automated-control-testing" target="_blank" rel="noreferrer">Automated control testing ↗</a>
+                <a href="https://s-pro.io/blog/ai-pilot-to-production-bank" target="_blank" rel="noreferrer">Go / no-go questions ↗</a>
                 <a href="https://s-pro.io/ai-proof-of-concept-to-production-bank" target="_blank" rel="noreferrer">Pilot-to-production approach ↗</a>
+                <a href="https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/" target="_blank" rel="noreferrer">OWASP Agentic Top 10 ↗</a>
               </div>
             </section>
 
@@ -621,6 +626,7 @@ export default function Home() {
                     <tr><td><strong>P0 · Pilot gate</strong></td><td>Authoritative delegation source</td><td>Resolve the mandate and delegation chain from a customer-owned source of truth, with version, revocation and effective dates.</td><td>Customer business owner / IAM</td><td>Approved authority matrix, versioned contract and revocation test.</td></tr>
                     <tr><td><strong>P0 · Pilot gate</strong></td><td>Action-bound human approval</td><td>Use a signed, single-use approval bound to agent, principal, action, resource, amount, beneficiary, expiry and request digest.</td><td>S-PRO workflow / customer</td><td>Approval replay, parameter-tampering and wrong-beneficiary tests.</td></tr>
                     <tr><td><strong>P0 · Pilot gate</strong></td><td>Tenant isolation and durable state</td><td>Enforce tenant authorization in storage and service layers; use durable shared state for nonce/replay protection and audit records.</td><td>Joint platform engineering</td><td>Cross-tenant negative tests, restart/replay tests and backup/restore evidence.</td></tr>
+                    <tr><td><strong>P0 · Pilot gate</strong></td><td>Runtime evidence trust</td><td>Version the event schema; validate agent-scoped HMAC, timestamp, nonce, sequence and event identifiers; persist replay state across instances; authenticate and tenant-scope every evidence read and stream.</td><td>Joint · SHEWIUN connector + S-PRO runtime</td><td>Replay across restarts/instances, cross-tenant read tests, key rotation/revocation and source-to-event correlation.</td></tr>
                     <tr><td><strong>P1 · Production</strong></td><td>Resilience and containment</td><td>Document fail-closed behavior, timeout budgets, bounded retries, idempotency, rate limits, circuit breakers, revocation and emergency stop.</td><td>S-PRO runtime / operations</td><td>Fault-injection results, runbooks, alert tests and recovery exercise.</td></tr>
                     <tr><td><strong>P1 · Production</strong></td><td>Evidence, privacy and monitoring</td><td>Use durable append-only evidence, controlled retention, PII/secret minimization, correlation IDs and export to the bank’s SIEM/OTel stack.</td><td>Joint · bank security</td><td>Evidence reconstruction, retention configuration and SIEM integration test.</td></tr>
                     <tr><td><strong>P1 · Production</strong></td><td>Policy regression lifecycle</td><td>Re-run positive and negative control suites when models, prompts, tools, permissions, contracts or runtime adapters change.</td><td>S-PRO QA + SHEWIUN</td><td>Versioned test catalogue, change trigger and exact before/after retest.</td></tr>
@@ -655,10 +661,65 @@ export default function Home() {
                 <article><span>02 · CONTRACT / TRACE EVALUATION</span><strong>Expected policy vs. observed runtime</strong><p>Evaluate supplied runtime events against an Authorization Contract. Correlate requests, decisions and outcomes; identify denied actions that still reached execution or actions without a correlated authorization decision.</p><small>Only the supplied event chain and test scope are assessed.</small></article>
                 <article><span>03 · AUTHENTICATED NON-PRODUCTION EVIDENCE</span><strong>Per-agent signed event ingestion</strong><p>Agent-scoped HMAC-SHA256 signatures, timestamp and nonce checks authenticate event submissions from explicitly authorized non-production agents.</p><small>Nonce replay tracking is currently deployment-instance memory, not a distributed durable replay store. A shared durable replay store is required before horizontal or production use.</small></article>
                 <article><span>04 · EVIDENCE & FINDINGS</span><strong>Traceable security output</strong><p>Structured findings include severity, claim level, expected and observed behavior, business impact, remediation and blast-radius context. Runtime assessments produce a SHA-256 evidence hash.</p><small>A hash is an integrity reference, not an externally signed or immutable ledger. Independent evidence anchoring and retention controls remain separate requirements.</small></article>
-                <article><span>05 · AGENT IDENTITY VERIFICATION</span><strong>Authenticated discovery & metadata</strong><p>AgentProof includes a verified identity endpoint flow for non-production targets, with an agent identity document and capability, permission, data-scope and approval metadata.</p><small>Production identity federation and customer IdP integration still require engineering and security review.</small></article>
+                <article><span>05 · AGENT IDENTITY DISCOVERY</span><strong>Token-authenticated non-production discovery</strong><p>AgentProof can call an HTTPS identity endpoint with an authorization token and retrieve the declared agent ID, version, environment, capabilities, permissions, data scopes and approval metadata.</p><small>This verifies the endpoint response under the configured trust relationship; it is not hardware-backed attestation or production workload-identity federation.</small></article>
                 <article><span>06 · NON-DESTRUCTIVE RED-TEAM PLANNING</span><strong>Attack hypotheses, not exploit claims</strong><p>A bounded planner can prepare hypotheses for tool abuse, permission escalation, scope escape, approval bypass, data exfiltration and indirect injection. An optional MiniMax M2.7 component generates structured test hypotheses and guardrails.</p><small>Planning is not proof of exploitation. Production attack planning is blocked; this component does not autonomously execute destructive tests.</small></article>
               </div>
-              <div className="sp-limit-note">Integration boundary: AgentProof runtime ingestion and trace evaluation are not currently connected to the synthetic payment sandbox shown above. The current AgentProof retest route is configuration-only; it does not execute the same attack against a customer runtime. A joint pilot would need a customer-authorized connector, event schema, trust model and evidence-retention design.</div>
+              <div className="sp-limit-note">Integration boundary: AgentProof runtime ingestion and trace evaluation are not currently connected to the synthetic payment sandbox shown above. The current AgentProof retest route is configuration-only; it does not execute the same attack against a customer runtime. The current AgentProof runtime event store is a demonstration component, not a production multi-tenant evidence service; authenticated, tenant-scoped reads and durable storage must be completed before customer deployment. A joint pilot would need a customer-authorized connector, event schema, trust model and evidence-retention design.</div>
+            </section>
+
+
+            <section className="sp-section sp-evidence-model" id="sp-evidence-model">
+              <div className="sp-section-heading">
+                <div><div className="sp-kicker">CISO VIEW · EVIDENCE MATURITY & CLAIM LEVELS</div><h3>Know exactly what each result proves—and what it does not</h3></div>
+                <p>Evidence quality depends on its source, authentication, completeness and enforcement point. SHEWIUN separates a configuration observation from a policy decision, a supplied runtime trace and a control enforced in a customer API.</p>
+              </div>
+              <div className="sp-evidence-grid">
+                <article>
+                  <span>LEVEL 01 · CONFIGURATION</span>
+                  <strong>Declared manifest and authority analysis</strong>
+                  <p>Inspect declared agent tools, permissions, scopes, transaction types and approval gates. Identify missing bindings, broad scopes and potentially risky permission combinations.</p>
+                  <div className="sp-evidence-claim"><b>Claim level</b><em>Potential / configuration</em></div>
+                  <small>Shows what the manifest declares. It does not prove that a tool was called or that a business action was reachable at runtime.</small>
+                </article>
+                <article>
+                  <span>LEVEL 02 · POLICY EVALUATION</span>
+                  <strong>Deterministic decision on a supplied request</strong>
+                  <p>The current Business Authority demo sends a typed request to its backend policy engine and receives ALLOW or DENY with a decision ID, policy version and individual checks.</p>
+                  <div className="sp-evidence-claim"><b>Claim level</b><em>Policy evaluation</em></div>
+                  <small>The demo result is not proof that an external agent executed—or was blocked by—a real customer API. Its identities and approval flags are synthetic test inputs.</small>
+                </article>
+                <article>
+                  <span>LEVEL 03 · RUNTIME EVIDENCE</span>
+                  <strong>Authenticated, correlated event chain</strong>
+                  <p>AgentProof can validate supplied non-production events signed with an agent-scoped HMAC, then correlate tool requests, authorization decisions and reported action outcomes against a contract.</p>
+                  <div className="sp-evidence-claim"><b>Claim level</b><em>Runtime evidence · submitted scope</em></div>
+                  <small>The engine evaluates the events it receives; it is not an independent witness to every action. Completeness and source trust depend on the customer connector and event-producing system. Production evidence is rejected by the current ingestion route.</small>
+                </article>
+                <article>
+                  <span>LEVEL 04 · ENFORCED CONTROL</span>
+                  <strong>Decision enforced by the protected API</strong>
+                  <p>A customer-side PEP must verify a fresh decision bound to the exact workload, principal, tenant, resource, action and canonical parameters before allowing a mutation.</p>
+                  <div className="sp-evidence-claim"><b>Claim level</b><em>Not implemented in this demo</em></div>
+                  <small>This requires joint S-PRO/customer integration, trusted identity, action-bound approvals, fail-closed behavior and negative tests proving that DENY creates no side effect.</small>
+                </article>
+              </div>
+              <div className="sp-evidence-integrity">
+                <div>
+                  <span>CRYPTOGRAPHIC EVIDENCE · IMPORTANT DISTINCTIONS</span>
+                  <strong>A SHA-256 hash is useful—but it is not a complete trust chain.</strong>
+                  <p>AgentProof hashes the supplied contract and event payload. The runtime connector also authenticates submissions with HMAC-SHA256, a timestamp and a nonce in non-production environments. These controls help detect tampering and replay within the current implementation’s scope.</p>
+                </div>
+                <ul>
+                  <li>A hash alone does not prove who created the evidence or when it existed.</li>
+                  <li>HMAC authentication depends on secret custody, rotation and agent-key revocation.</li>
+                  <li>The current nonce cache is instance-local memory; it is not a durable, distributed replay store.</li>
+                  <li>External timestamping, signed checkpoints, immutable retention and authenticated tenant-scoped evidence access remain production work.</li>
+                </ul>
+              </div>
+              <div className="sp-evidence-retest">
+                <strong>Retest claim boundary</strong>
+                <p>The M2.7 40/67 cases in this demonstrator are server-side policy tests. AgentProof’s current retest endpoint compares configuration analysis before and after a simulated remediation; it does not replay the same attack against a connected customer runtime. A true runtime retest must be implemented with the authorized connector and verified against the protected API outcome.</p>
+              </div>
             </section>
 
             <section className="sp-section" id="sp-cfa">
