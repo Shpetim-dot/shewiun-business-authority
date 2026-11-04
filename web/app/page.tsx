@@ -34,81 +34,81 @@ const API_BASE = "/api/backend";
 const assessmentCases = (profile: AssessmentProfile): AssessmentCase[] => {
  const c=(n:number,title:string,category:string,expected:"ALLOW"|"DENY",input:RuntimeInput={}):AssessmentCase=>({id:String(n).padStart(2,"0"),title,category,expected,input});
  const lite:AssessmentCase[]=[
- c(1,"Legitime Lieferantenzahlung","POSITIVE CONTROL","ALLOW"),
- c(2,"Betrag oberhalb Delegationslimit","PARAMETER","DENY",{amount:"15000"}),
+ c(1,"Legitimate supplier payment","POSITIVE CONTROL","ALLOW"),
+ c(2,"Amount exceeds delegated limit","PARAMETER","DENY",{amount:"15000"}),
  c(3,"Limit + CHF 1","PARAMETER","DENY",{amount:"10001"}),
  c(4,"Exaktes Limit ohne Approval","APPROVAL","DENY",{amount:"10000"}),
- c(5,"Approval-Schwelle ohne Freigabe","APPROVAL","DENY",{amount:"7500"}),
+ c(5,"Approval threshold without approval","APPROVAL","DENY",{amount:"7500"}),
  c(6,"Knapp unter Approval-Schwelle","PARAMETER","ALLOW",{amount:"7499.99"}),
- c(7,"Kleinstbetrag","PARAMETER","ALLOW",{amount:"0.01"}),
+ c(7,"Minimum amount","PARAMETER","ALLOW",{amount:"0.01"}),
  c(8,"Falsche Währung EUR","PARAMETER","DENY",{currency:"EUR"}),
  c(9,"Falsche Währung USD","PARAMETER","DENY",{currency:"USD"}),
- c(10,"Unbekannter Runtime-Aussteller","IDENTITY","DENY",{runtime_identity:"untrusted-runtime"}),
- c(11,"Unbekannte Agentenidentität","IDENTITY","DENY",{agent_id:"agent-unknown"}),
- c(12,"Unbekannter Auftraggeber","IDENTITY","DENY",{acting_for_id:"person-unknown"}),
- c(13,"Unbekannter Mandant","TENANT","DENY",{organization_id:"org-other-bank"}),
- c(14,"Unbekannte Kontoressource","RESOURCE SCOPE","DENY",{resource_id:"konto-unknown",data_scope:"konto-unknown"}),
- c(15,"Scope zeigt auf anderes Konto","RESOURCE SCOPE","DENY",{data_scope:"konto-corporate-1002"}),
+ c(10,"Unknown runtime issuer","IDENTITY","DENY",{runtime_identity:"untrusted-runtime"}),
+ c(11,"Unknown agent identity","IDENTITY","DENY",{agent_id:"agent-unknown"}),
+ c(12,"Unknown acting principal","IDENTITY","DENY",{acting_for_id:"person-unknown"}),
+ c(13,"Unknown tenant","TENANT","DENY",{organization_id:"org-other-bank"}),
+ c(14,"Unknown account resource","RESOURCE SCOPE","DENY",{resource_id:"konto-unknown",data_scope:"konto-unknown"}),
+ c(15,"Scope points to another account","RESOURCE SCOPE","DENY",{data_scope:"konto-corporate-1002"}),
  c(16,"Globaler Wildcard-Scope","RESOURCE SCOPE","DENY",{data_scope:"*"}),
  c(17,"Scope all","RESOURCE SCOPE","DENY",{data_scope:"all"}),
  c(18,"Scope any","RESOURCE SCOPE","DENY",{data_scope:"any"}),
  c(19,"Falsches Tool","TOOL BINDING","DENY",{tool:"payment.execute"}),
  c(20,"Falsche Permission","PERMISSION","DENY",{permission:"beneficiary.update"}),
- c(21,"Tool und Permission abweichend","COMPOSITION 01","DENY",{tool:"payment.execute",permission:"payment.read"}),
- c(22,"Zweck Kontenauflistung","PURPOSE","DENY",{purpose:"account_enumeration"}),
+ c(21,"Tool and permission mismatch","COMPOSITION 01","DENY",{tool:"payment.execute",permission:"payment.read"}),
+ c(22,"Account enumeration purpose","PURPOSE","DENY",{purpose:"account_enumeration"}),
  c(23,"Zweck Lieferanten-Onboarding","PURPOSE","DENY",{purpose:"vendor_onboarding"}),
- c(24,"Begünstigtenänderung","BUSINESS ACTION","DENY",{action:"beneficiary.update",tool:"beneficiary.update",permission:"beneficiary.update"}),
- c(25,"Zahlungsfreigabe statt Erstellung","BUSINESS ACTION","DENY",{action:"payment.approve",tool:"payment.approve",permission:"payment.approve"}),
- c(26,"Leseaktion ausserhalb dieses Contracts","BUSINESS ACTION","DENY",{action:"payment.read",tool:"payment.read",permission:"payment.read"}),
+ c(24,"Beneficiary change","BUSINESS ACTION","DENY",{action:"beneficiary.update",tool:"beneficiary.update",permission:"beneficiary.update"}),
+ c(25,"Payment approval instead of creation","BUSINESS ACTION","DENY",{action:"payment.approve",tool:"payment.approve",permission:"payment.approve"}),
+ c(26,"Read action outside this contract","BUSINESS ACTION","DENY",{action:"payment.read",tool:"payment.read",permission:"payment.read"}),
  c(27,"Approval fehlt vollständig","APPROVAL","DENY",{amount:"8000",approval_present:false,approval_fresh:true}),
- c(28,"Approval nicht frisch","APPROVAL","DENY",{amount:"8000",approval_present:true,approval_fresh:false}),
- c(29,"Frischer Demo-Approval","POSITIVE CONTROL","ALLOW",{amount:"8000",approval_present:true,approval_fresh:true}),
- c(30,"Exaktes Delegationslimit mit Demo-Approval","PARAMETER","ALLOW",{amount:"10000",approval_present:true,approval_fresh:true}),
- c(31,"Limit + 0.01 trotz Approval","PARAMETER","DENY",{amount:"10000.01",approval_present:true,approval_fresh:true}),
- c(32,"Ursprungsvollmacht-Limit trotz Delegation","AUTHORITY DELTA","DENY",{amount:"25000",approval_present:true,approval_fresh:true}),
- c(33,"Niedriger Betrag mit optionalem Approval","PARAMETER","ALLOW",{amount:"5000",approval_present:true,approval_fresh:false}),
+ c(28,"Approval is stale","APPROVAL","DENY",{amount:"8000",approval_present:true,approval_fresh:false}),
+ c(29,"Fresh demo approval","POSITIVE CONTROL","ALLOW",{amount:"8000",approval_present:true,approval_fresh:true}),
+ c(30,"Exact delegated limit with demo approval","PARAMETER","ALLOW",{amount:"10000",approval_present:true,approval_fresh:true}),
+ c(31,"Limit + 0.01 despite approval","PARAMETER","DENY",{amount:"10000.01",approval_present:true,approval_fresh:true}),
+ c(32,"Original mandate limit despite delegation","AUTHORITY DELTA","DENY",{amount:"25000",approval_present:true,approval_fresh:true}),
+ c(33,"Low amount with optional approval","PARAMETER","ALLOW",{amount:"5000",approval_present:true,approval_fresh:false}),
  c(34,"Permission payment.read statt create","PERMISSION","DENY",{permission:"payment.read"}),
  c(35,"MCP-Tool-Name weicht vom Contract ab","MCP SURFACE","DENY",{tool:"mcp.payment.create"}),
  c(36,"MCP-Wildcard-Permission","MCP SURFACE","DENY",{permission:"mcp:*"}),
- c(37,"Falscher Ressourcen-Identifier","RESOURCE SCOPE","DENY",{data_scope:"account:1002"}),
- c(38,"Mandantenweiter Scope","RESOURCE SCOPE","DENY",{data_scope:"org-alpenbank/*"}),
- c(39,"Identitäts- und Scope-Kombination","COMPOSITION 02","DENY",{runtime_identity:"untrusted-runtime",data_scope:"*"}),
- c(40,"Zweck- und Permission-Kombination","COMPOSITION 03","DENY",{purpose:"account_enumeration",permission:"beneficiary.update"})
+ c(37,"Incorrect resource identifier","RESOURCE SCOPE","DENY",{data_scope:"account:1002"}),
+ c(38,"Tenant-wide scope","RESOURCE SCOPE","DENY",{data_scope:"org-alpenbank/*"}),
+ c(39,"Identity and scope combination","COMPOSITION 02","DENY",{runtime_identity:"untrusted-runtime",data_scope:"*"}),
+ c(40,"Purpose and permission combination","COMPOSITION 03","DENY",{purpose:"account_enumeration",permission:"beneficiary.update"})
  ];
  if(profile==="lite")return lite;
  return [...lite,
- c(41,"CHF 7'499.98 ohne Approval","PARAMETER","ALLOW",{amount:"7499.98"}),
- c(42,"CHF 7'500.01 ohne Approval","APPROVAL","DENY",{amount:"7500.01"}),
- c(43,"CHF 7'500.01 mit frischem Approval","APPROVAL","ALLOW",{amount:"7500.01",approval_present:true,approval_fresh:true}),
- c(44,"CHF 9'999.99 mit frischem Approval","PARAMETER","ALLOW",{amount:"9999.99",approval_present:true,approval_fresh:true}),
- c(45,"CHF 10'000.00 mit frischem Approval","PARAMETER","ALLOW",{amount:"10000",approval_present:true,approval_fresh:true}),
- c(46,"CHF 10'000.01 trotz Approval","PARAMETER","DENY",{amount:"10000.01",approval_present:true,approval_fresh:true}),
- c(47,"CHF 100'000 mit Approval","AUTHORITY DELTA","DENY",{amount:"100000",approval_present:true,approval_fresh:true}),
- c(48,"CHF 100'000.01 mit Approval","AUTHORITY DELTA","DENY",{amount:"100000.01",approval_present:true,approval_fresh:true}),
- c(49,"Approval-State 00 bei Schwelle","APPROVAL MATRIX","DENY",{amount:"7500",approval_present:false,approval_fresh:false}),
- c(50,"Approval-State 01 bei Schwelle","APPROVAL MATRIX","DENY",{amount:"7500",approval_present:false,approval_fresh:true}),
- c(51,"Approval-State 10 bei Schwelle","APPROVAL MATRIX","DENY",{amount:"7500",approval_present:true,approval_fresh:false}),
- c(52,"Approval-State 11 bei Schwelle","APPROVAL MATRIX","ALLOW",{amount:"7500",approval_present:true,approval_fresh:true}),
- c(53,"Optionaler Approval unter Schwelle","APPROVAL MATRIX","ALLOW",{amount:"7499.99",approval_present:true,approval_fresh:false}),
- c(54,"Fresh ohne vorhandenen Approval","APPROVAL MATRIX","DENY",{amount:"8000",approval_present:false,approval_fresh:true}),
- c(55,"Vorhanden und frisch bei CHF 8'000","APPROVAL MATRIX","ALLOW",{amount:"8000",approval_present:true,approval_fresh:true}),
- c(56,"Vorhanden aber nicht frisch bei CHF 8'000","APPROVAL MATRIX","DENY",{amount:"8000",approval_present:true,approval_fresh:false}),
- c(57,"Zweck + Scope gleichzeitig manipuliert","COMPOSITION 04","DENY",{purpose:"account_enumeration",data_scope:"*"}),
- c(58,"Identität + Tool gleichzeitig manipuliert","COMPOSITION 05","DENY",{runtime_identity:"untrusted-runtime",tool:"payment.execute"}),
- c(59,"Approval + Permission gleichzeitig manipuliert","COMPOSITION 06","DENY",{amount:"8000",approval_present:false,approval_fresh:false,permission:"beneficiary.update"}),
- c(60,"Unbekannter Auftraggeber mit gültigem Betrag","AUTHORITY CHAIN","DENY",{acting_for_id:"person-finance-unknown"}),
- c(61,"Fremde Ressource und fremder Scope","RESOURCE BOUNDARY","DENY",{resource_id:"resource-foreign",data_scope:"resource-foreign"}),
- c(62,"Mandantenwechsel bei gültigem Kontext","TENANT ISOLATION","DENY",{organization_id:"org-foreign"}),
- c(63,"Wiederholte identische PDP-Anfrage","REPLAY OBSERVATION","ALLOW",{}),
- c(64,"Action-Tool-Permission-Tripel manipuliert","COMPOSITION 07","DENY",{action:"beneficiary.update",tool:"payment.create",permission:"beneficiary.update"}),
- c(65,"Purpose + Scope + Permission verkettet","COMPOSITION 08","DENY",{purpose:"account_enumeration",data_scope:"*",permission:"beneficiary.update"}),
- c(66,"Identity + Amount + Approval verkettet","COMPOSITION 09","DENY",{runtime_identity:"untrusted-runtime",amount:"15000",approval_present:true,approval_fresh:true}),
- c(67,"Action + Tool + Scope verkettet","COMPOSITION 10","DENY",{action:"beneficiary.update",tool:"payment.create",permission:"beneficiary.update",data_scope:"*"})
+ c(41,"CHF 7,499.98 without approval","PARAMETER","ALLOW",{amount:"7499.98"}),
+ c(42,"CHF 7,500.01 without approval","APPROVAL","DENY",{amount:"7500.01"}),
+ c(43,"CHF 7,500.01 with fresh approval","APPROVAL","ALLOW",{amount:"7500.01",approval_present:true,approval_fresh:true}),
+ c(44,"CHF 9,999.99 with fresh approval","PARAMETER","ALLOW",{amount:"9999.99",approval_present:true,approval_fresh:true}),
+ c(45,"CHF 10,000.00 with fresh approval","PARAMETER","ALLOW",{amount:"10000",approval_present:true,approval_fresh:true}),
+ c(46,"CHF 10,000.01 despite approval","PARAMETER","DENY",{amount:"10000.01",approval_present:true,approval_fresh:true}),
+ c(47,"CHF 100,000 with approval","AUTHORITY DELTA","DENY",{amount:"100000",approval_present:true,approval_fresh:true}),
+ c(48,"CHF 100,000.01 with approval","AUTHORITY DELTA","DENY",{amount:"100000.01",approval_present:true,approval_fresh:true}),
+ c(49,"Approval state 00 at threshold","APPROVAL MATRIX","DENY",{amount:"7500",approval_present:false,approval_fresh:false}),
+ c(50,"Approval state 01 at threshold","APPROVAL MATRIX","DENY",{amount:"7500",approval_present:false,approval_fresh:true}),
+ c(51,"Approval state 10 at threshold","APPROVAL MATRIX","DENY",{amount:"7500",approval_present:true,approval_fresh:false}),
+ c(52,"Approval state 11 at threshold","APPROVAL MATRIX","ALLOW",{amount:"7500",approval_present:true,approval_fresh:true}),
+ c(53,"Optional approval below threshold","APPROVAL MATRIX","ALLOW",{amount:"7499.99",approval_present:true,approval_fresh:false}),
+ c(54,"Fresh flag without an approval","APPROVAL MATRIX","DENY",{amount:"8000",approval_present:false,approval_fresh:true}),
+ c(55,"Present and fresh at CHF 8,000","APPROVAL MATRIX","ALLOW",{amount:"8000",approval_present:true,approval_fresh:true}),
+ c(56,"Present but stale at CHF 8,000","APPROVAL MATRIX","DENY",{amount:"8000",approval_present:true,approval_fresh:false}),
+ c(57,"Purpose and scope manipulated together","COMPOSITION 04","DENY",{purpose:"account_enumeration",data_scope:"*"}),
+ c(58,"Identity and tool manipulated together","COMPOSITION 05","DENY",{runtime_identity:"untrusted-runtime",tool:"payment.execute"}),
+ c(59,"Approval and permission manipulated together","COMPOSITION 06","DENY",{amount:"8000",approval_present:false,approval_fresh:false,permission:"beneficiary.update"}),
+ c(60,"Unknown principal with otherwise valid amount","AUTHORITY CHAIN","DENY",{acting_for_id:"person-finance-unknown"}),
+ c(61,"Foreign resource and foreign scope","RESOURCE BOUNDARY","DENY",{resource_id:"resource-foreign",data_scope:"resource-foreign"}),
+ c(62,"Tenant switch in otherwise valid context","TENANT ISOLATION","DENY",{organization_id:"org-foreign"}),
+ c(63,"Repeated identical PDP request","REPLAY OBSERVATION","ALLOW",{}),
+ c(64,"Action-tool-permission tuple manipulated","COMPOSITION 07","DENY",{action:"beneficiary.update",tool:"payment.create",permission:"beneficiary.update"}),
+ c(65,"Purpose, scope and permission composition","COMPOSITION 08","DENY",{purpose:"account_enumeration",data_scope:"*",permission:"beneficiary.update"}),
+ c(66,"Identity, amount and approval composition","COMPOSITION 09","DENY",{runtime_identity:"untrusted-runtime",amount:"15000",approval_present:true,approval_fresh:true}),
+ c(67,"Action, tool and scope composition","COMPOSITION 10","DENY",{action:"beneficiary.update",tool:"payment.create",permission:"beneficiary.update",data_scope:"*"})
  ];
 };
 
 const money = (value: number | string | null | undefined) =>
-  value === null || value === undefined ? "—" : new Intl.NumberFormat("de-CH", { style: "currency", currency: "CHF", maximumFractionDigits: 0 }).format(Number(value));
+  value === null || value === undefined ? "—" : new Intl.NumberFormat("en-CH", { style: "currency", currency: "CHF", maximumFractionDigits: 0 }).format(Number(value));
 
 function Badge({ children, tone = "neutral" }: { children: ReactNode; tone?: "good" | "bad" | "warn" | "neutral" }) {
   return <span className={`badge badge-${tone}`}><i />{children}</span>;
@@ -140,7 +140,7 @@ export default function Home() {
   const [payments, setPayments] = useState(0);
   const [effectiveLimit, setEffectiveLimit] = useState<number | null>(null);
   const [auditIntegrity, setAuditIntegrity] = useState<boolean | null>(null);
-  const [storageMode, setStorageMode] = useState("Nicht geprüft");
+  const [storageMode, setStorageMode] = useState("Not checked");
   const [authBusy, setAuthBusy] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
   const [authEvaluation, setAuthEvaluation] = useState<AuthorizationEvaluation | null>(null);
@@ -170,9 +170,9 @@ export default function Home() {
         fetch(`${API_BASE}/v1/audit/integritaet?organization_id=${API_ORG}`, { cache: "no-store" }),
         fetch(`${API_BASE}/v1/agenten/${AGENT}/effektive-berechtigungen?organization_id=${API_ORG}&acting_for_id=${CFO}&resource_id=${ACCOUNT}`, { cache: "no-store" }),
       ]);
-      if (!health.ok || !graph.ok || !audit.ok || !paymentRows.ok || !integrity.ok || !authority.ok) throw new Error("Backend nicht erreichbar");
+      if (!health.ok || !graph.ok || !audit.ok || !paymentRows.ok || !integrity.ok || !authority.ok) throw new Error("Backend unavailable");
       const healthData = await health.json();
-      setStorageMode(healthData.speicher === "postgresql" ? "PostgreSQL · dauerhaft" : "SQLite-Demo · flüchtig");
+      setStorageMode(healthData.speicher === "postgresql" ? "PostgreSQL · persistent" : "SQLite demo · ephemeral");
       const graphData = await graph.json();
       setNodes(graphData.knoten || []);
       setEdges(graphData.verbindungen || []);
@@ -201,13 +201,13 @@ export default function Home() {
       });
       const payload = await response.json();
       if (!response.ok) {
-        setResult({ ok: false, text: `Abgelehnt: ${payload?.detail?.code || "AUTORISIERUNG_VERWEIGERT"} · Keine Zahlung angelegt.` });
+        setResult({ ok: false, text: `Denied: ${payload?.detail?.code || "AUTHORIZATION_DENIED"} · No sandbox payment record was created.` });
       } else {
-        setResult({ ok: true, text: `Zahlung ${payload.payment_id} erstellt · ${money(amount)} · Entscheidung ${payload.authorization_decision_id.slice(0, 8)}` });
+        setResult({ ok: true, text: `Sandbox payment ${payload.payment_id} created · ${money(amount)} · decision ${payload.authorization_decision_id.slice(0, 8)}` });
       }
       await loadData();
     } catch {
-      setResult({ ok: false, text: "Backend nicht erreichbar. Starte zuerst die lokale Demo-Umgebung." });
+      setResult({ ok: false, text: "Backend unavailable. Check the demo API connection." });
     } finally { setBusy(false); }
   }
 
@@ -226,12 +226,12 @@ export default function Home() {
         }),
       });
       const payload = await response.json();
-      if (!response.ok) throw new Error(payload?.detail || payload?.code || "Autorisierungsprüfung fehlgeschlagen.");
+      if (!response.ok) throw new Error(payload?.detail || payload?.code || "Authorization evaluation failed.");
       setAuthEvaluation(payload);
       await loadData();
     } catch (error) {
       setAuthEvaluation(null);
-      setAuthError(error instanceof Error ? error.message : "Autorisierungsprüfung fehlgeschlagen.");
+      setAuthError(error instanceof Error ? error.message : "Authorization evaluation failed.");
     } finally {
       setAuthBusy(false);
     }
@@ -270,8 +270,8 @@ export default function Home() {
           const response=await fetch(API_BASE+"/v1/autorisierung/evaluieren",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({...base,...test.input})});
           const payload=await response.json();
           const actual=response.ok&&(payload.entscheidung==="ALLOW"||payload.entscheidung==="DENY")?payload.entscheidung:"ERROR";
-          collected.push({...test,actual,matched:actual===test.expected,reason:payload.grund||payload.detail||"Keine Policy-Antwort",decision_id:payload.decision_id,checks:Array.isArray(payload.checks)?payload.checks:[]});
-        } catch {collected.push({...test,actual:"ERROR",matched:false,reason:"Backend oder Netzwerk nicht erreichbar.",checks:[]});}
+          collected.push({...test,actual,matched:actual===test.expected,reason:payload.grund||payload.detail||"No policy response",decision_id:payload.decision_id,checks:Array.isArray(payload.checks)?payload.checks:[]});
+        } catch {collected.push({...test,actual:"ERROR",matched:false,reason:"Backend or network unavailable.",checks:[]});}
         setAssessmentResults([...collected]);setAssessmentProgress(i+1);
       }
       setAssessmentTimestamp(new Date().toISOString());await loadData();
@@ -296,24 +296,24 @@ export default function Home() {
   const retainedByPrincipal = (originGrant?.aktionen || []).filter(action => !effectiveActions.includes(action));
 
   const nav = [
-    { id: "partner", label: "S-PRO Partner Demo", icon: "shield", group: "PLATTFORM" },
-    { id: "uebersicht", label: "Übersicht", icon: "grid", group: "PLATTFORM" },
-    { id: "graph", label: "Autoritätsgraph", icon: "graph", group: "AUTORITÄT" },
-    { id: "berechtigungen", label: "Berechtigungen", icon: "shield", group: "AUTORITÄT" },
-    { id: "autorisierung", label: "Autorisierung", icon: "activity", group: "DURCHSETZUNG" },
-    { id: "laufzeit", label: "Laufzeitkontrolle", icon: "activity", group: "DURCHSETZUNG" },
-    { id: "freigaben", label: "Freigaben", icon: "check", group: "DURCHSETZUNG" },
-    { id: "nachweise", label: "Sicherheitsnachweise", icon: "file", group: "GOVERNANCE" },
+    { id: "partner", label: "S-PRO Partner Demo", icon: "shield", group: "PLATFORM" },
+    { id: "uebersicht", label: "Overview", icon: "grid", group: "PLATFORM" },
+    { id: "graph", label: "Authority Graph", icon: "graph", group: "AUTHORITY" },
+    { id: "berechtigungen", label: "Permissions", icon: "shield", group: "AUTHORITY" },
+    { id: "autorisierung", label: "Authorization", icon: "activity", group: "ENFORCEMENT" },
+    { id: "laufzeit", label: "Runtime Control", icon: "activity", group: "ENFORCEMENT" },
+    { id: "freigaben", label: "Approvals", icon: "check", group: "ENFORCEMENT" },
+    { id: "nachweise", label: "Security Evidence", icon: "file", group: "GOVERNANCE" },
     { id: "assessment", label: "Security Assessment", icon: "shield", group: "SECURITY TESTING" },
     { id: "findings", label: "Findings & Retest", icon: "file", group: "SECURITY TESTING" },
-    { id: "integrationen", label: "Integrationen", icon: "grid", group: "PLATTFORM" },
+    { id: "integrationen", label: "Integrations", icon: "grid", group: "PLATFORM" },
     { id: "workspace", label: "Workspace & SSO", icon: "lock", group: "WORKSPACE" },
     { id: "programme", label: "Programme", icon: "activity", group: "GOVERNANCE" },
-    { id: "system", label: "System", icon: "settings", group: "VERWALTUNG" },
+    { id: "system", label: "System", icon: "settings", group: "ADMINISTRATION" },
   ];
-  const grouped = ["PLATTFORM", "AUTORITÄT", "DURCHSETZUNG", "SECURITY TESTING", "GOVERNANCE", "WORKSPACE", "VERWALTUNG"];
+  const grouped = ["PLATFORM", "AUTHORITY", "ENFORCEMENT", "SECURITY TESTING", "GOVERNANCE", "WORKSPACE", "ADMINISTRATION"];
 
-  function title() { return nav.find(n => n.id === section)?.label || "Übersicht"; }
+  function title() { return nav.find(n => n.id === section)?.label || "Overview"; }
 
   return (
     <div className={section === "partner" ? "shell shell-partner" : "shell"}>
@@ -321,7 +321,7 @@ export default function Home() {
         <div className="brand">
           <div><div className="brand-name">SHEWIUN</div><div className="brand-sub">AI AGENT AUTHORIZATION SECURITY</div></div>
         </div>
-        <div className="tenant-switch"><span className="tenant-icon">A</span><div><small>MANDANT</small><strong>Alpenbank Demo AG</strong></div><span className="chevron">⌄</span></div>
+        <div className="tenant-switch"><span className="tenant-icon">A</span><div><small>TENANT</small><strong>Alpenbank Demo AG</strong></div><span className="chevron">⌄</span></div>
         <nav>
           {grouped.map(group => <div className="nav-group" key={group}>
             <div className="nav-caption">{group}</div>
@@ -330,19 +330,19 @@ export default function Home() {
             </button>)}
           </div>)}
         </nav>
-        <div className="sidebar-bottom"><div className="environment"><span className="env-dot" />TESTUMGEBUNG</div><div className="sidebar-version">SHEWIUN SECURITY WORKSPACE · DEMO 0.3</div></div>
+        <div className="sidebar-bottom"><div className="environment"><span className="env-dot" />TEST ENVIRONMENT</div><div className="sidebar-version">SHEWIUN SECURITY WORKSPACE · DEMO 0.3</div></div>
       </aside>
 
       <main className="main">
         <header className="topbar">
           <div className="breadcrumb">SHEWIUN <span>/</span> {title().toUpperCase()}</div>
-          <div className="topbar-right"><Badge tone={apiState === "verbunden" ? "good" : apiState === "getrennt" ? "bad" : "warn"}>{apiState === "verbunden" ? "API VERBUNDEN" : apiState === "getrennt" ? "BACKEND GETRENNT" : "VERBINDUNG WIRD GEPRÜFT"}</Badge><div className="user-chip"><span>SM</span><div><strong>Systemadministration</strong><small>Demo-Zugriff</small></div></div></div>
+          <div className="topbar-right"><Badge tone={apiState === "verbunden" ? "good" : apiState === "getrennt" ? "bad" : "warn"}>{apiState === "verbunden" ? "API CONNECTED" : apiState === "getrennt" ? "BACKEND DISCONNECTED" : "CHECKING CONNECTION"}</Badge><div className="user-chip"><span>SM</span><div><strong>System administrator</strong><small>Demo access</small></div></div></div>
         </header>
 
         <div className="content">
           <div className="page-heading">
-            <div><div className="eyebrow">AI AGENT AUTHORIZATION SECURITY · CONTROLLED DEMO</div><h1>{title()}</h1><p>Geschäftliche Autorität modellieren, Agentenaktionen testen und nachvollziehbare Security-Evidence erzeugen.</p></div>
-            <div className="heading-actions"><button className="button button-secondary" onClick={loadData}><span>↻</span> Aktualisieren</button><button className="button button-primary" onClick={() => setSection("graph")}>Autoritätsgraph öffnen <Icon name="arrow" /></button></div>
+            <div><div className="eyebrow">AI AGENT AUTHORIZATION SECURITY · CONTROLLED DEMO</div><h1>{title()}</h1><p>Model business authority, test agent actions and produce traceable security evidence.</p></div>
+            <div className="heading-actions"><button className="button button-secondary" onClick={loadData}><span>↻</span> Refresh</button><button className="button button-primary" onClick={() => setSection("graph")}>Open authority graph <Icon name="arrow" /></button></div>
           </div>
 
           {section === "partner" && <div className="partner-page">
@@ -888,5 +888,5 @@ function AuthorityGraph({ nodes, edges, large = false }: { nodes: GraphNode[]; e
 
 function EventTable({ events }: { events: EventItem[] }) {
   if (!events.length) return <div className="table-empty">Noch keine Autorisierungsentscheidungen vorhanden. Führe einen Sandbox-Test aus.</div>;
-  return <div className="table-wrap"><table><thead><tr><th>Zeitpunkt</th><th>Agent</th><th>Aktion</th><th>Betrag</th><th>Entscheidung</th><th>Grund</th></tr></thead><tbody>{events.map(e=><tr key={e.id}><td>{new Date(e.zeitpunkt).toLocaleString("de-DE")}</td><td><span className="mono">{e.agent}</span></td><td><code>{e.aktion}</code></td><td>{money(e.betrag)}</td><td><Badge tone={e.entscheidung === "ALLOW" ? "good" : "bad"}>{e.entscheidung}</Badge></td><td><span className="reason-code">{e.grund}</span></td></tr>)}</tbody></table></div>;
+  return <div className="table-wrap"><table><thead><tr><th>Zeitpunkt</th><th>Agent</th><th>Aktion</th><th>Betrag</th><th>Entscheidung</th><th>Grund</th></tr></thead><tbody>{events.map(e=><tr key={e.id}><td>{new Date(e.zeitpunkt).toLocaleString("en-GB")}</td><td><span className="mono">{e.agent}</span></td><td><code>{e.aktion}</code></td><td>{money(e.betrag)}</td><td><Badge tone={e.entscheidung === "ALLOW" ? "good" : "bad"}>{e.entscheidung}</Badge></td><td><span className="reason-code">{e.grund}</span></td></tr>)}</tbody></table></div>;
 }
