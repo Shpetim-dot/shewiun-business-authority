@@ -996,3 +996,12 @@ button:focus-visible,a:focus-visible{outline:3px solid #9bbcff;outline-offset:3p
   .sp-evidence-claim{align-items:flex-start;flex-direction:column;gap:5px}
   .sp-evidence-claim em{text-align:left}
 }
+
+
+/* Keep the SHEWIUN interface accent consistently blue; semantic error/warning states remain distinct. */
+.badge-good{background:#eaf1ff;color:#2457d6}
+.nav-item.active{background:#1b4277;color:#fff;box-shadow:inset 3px 0 #79a9ff}
+.stat-icon{background:#eaf1ff;color:#2457d6}
+.node-agent{fill:#edf3ff;stroke:#5c8ee8}
+.node-indicator,.indicator-agent{fill:#356fe0}
+.edge-delegation{stroke:#356fe0}
