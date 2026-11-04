@@ -391,6 +391,7 @@ export default function Home() {
                 <a href="#sp-live">Live demo</a>
                 <a href="#sp-architecture">Architecture</a>
                 <a href="#sp-threats">CISO view</a>
+                <a href="#sp-ciso-backlog">Hardening backlog</a>
                 <a href="#sp-agentproof">AgentProof</a>
                 <a href="#sp-pilot">Pilot</a>
               </nav>
@@ -462,6 +463,7 @@ export default function Home() {
                 <a href="https://s-pro.io/ai-agents-aml-transaction-monitoring-bank/" target="_blank" rel="noreferrer">AML & transaction monitoring ↗</a>
                 <a href="https://s-pro.io/ai-for-wealth-and-asset-managers/" target="_blank" rel="noreferrer">Wealth management ↗</a>
                 <a href="https://s-pro.io/ai-agent-production-gates-bank" target="_blank" rel="noreferrer">S-PRO’s six production gates ↗</a>
+                <a href="https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/" target="_blank" rel="noreferrer">OWASP Agentic Top 10 ↗</a>
                 <a href="https://s-pro.io/ai-proof-of-concept-to-production-bank" target="_blank" rel="noreferrer">Pilot-to-production approach ↗</a>
               </div>
             </section>
@@ -568,7 +570,7 @@ export default function Home() {
             <section className="sp-section" id="sp-threats">
               <div className="sp-section-heading">
                 <div><div className="sp-kicker">CISO VIEW · THREAT-TO-CONTROL MAPPING</div><h3>What is in scope—and what still needs defense in depth</h3></div>
-                <p>Mapped to relevant OWASP Top 10 for Agentic Applications risk families. This is a scope map for discussion, not a claim of OWASP conformance or full mitigation coverage.</p>
+                <p>Mapped to the OWASP Top 10 for Agentic Applications risk families. This is a scope map for discussion, not a claim of OWASP conformance or full mitigation coverage. <a href="https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/" target="_blank" rel="noreferrer">OWASP source ↗</a></p>
               </div>
               <div className="sp-threat-table-wrap">
                 <table className="sp-threat-table">
@@ -584,6 +586,29 @@ export default function Home() {
                 </table>
               </div>
               <div className="sp-no-claim"><strong>CISO principle:</strong> authorization is one layer in a defense-in-depth design. A valid ALLOW does not establish that the agent’s intent, model reasoning, source data or business outcome is safe. Separate controls are still required for prompt injection, data loss prevention, code execution, supply chain, monitoring and incident response.</div>
+            </section>
+
+            <section className="sp-section" id="sp-ciso-backlog">
+              <div className="sp-section-heading">
+                <div><div className="sp-kicker">CISO REVIEW · PRODUCTION HARDENING BACKLOG</div><h3>What must be closed before customer-connected enforcement</h3></div>
+                <p>This is a proposed engineering backlog, not a statement that these controls already exist. The first pilot should prove one small control path without introducing production credentials or real customer data.</p>
+              </div>
+              <div className="sp-backlog-table-wrap">
+                <table className="sp-backlog-table">
+                  <thead><tr><th>Priority</th><th>Control objective</th><th>Required engineering</th><th>Suggested owner</th><th>Evidence for sign-off</th></tr></thead>
+                  <tbody>
+                    <tr><td><strong>P0 · Pilot gate</strong></td><td>Trusted workload identity</td><td>Validate issuer, audience, subject, tenant and workload identity at the server boundary. Do not trust identity fields supplied by the model.</td><td>S-PRO / customer IAM</td><td>Negative identity tests, token validation logs and identity-to-agent binding.</td></tr>
+                    <tr><td><strong>P0 · Pilot gate</strong></td><td>Enforced decision-to-execution binding</td><td>Place the PEP in the protected API path. Bind the decision to a canonical request digest, resource, action and parameters; reject absent, expired or mismatched decisions.</td><td>Joint · S-PRO PEP</td><td>Proof that DENY, timeout and mismatched decision produce no side effect.</td></tr>
+                    <tr><td><strong>P0 · Pilot gate</strong></td><td>Authoritative delegation source</td><td>Resolve the mandate and delegation chain from a customer-owned source of truth, with version, revocation and effective dates.</td><td>Customer business owner / IAM</td><td>Approved authority matrix, versioned contract and revocation test.</td></tr>
+                    <tr><td><strong>P0 · Pilot gate</strong></td><td>Action-bound human approval</td><td>Use a signed, single-use approval bound to agent, principal, action, resource, amount, beneficiary, expiry and request digest.</td><td>S-PRO workflow / customer</td><td>Approval replay, parameter-tampering and wrong-beneficiary tests.</td></tr>
+                    <tr><td><strong>P0 · Pilot gate</strong></td><td>Tenant isolation and durable state</td><td>Enforce tenant authorization in storage and service layers; use durable shared state for nonce/replay protection and audit records.</td><td>Joint platform engineering</td><td>Cross-tenant negative tests, restart/replay tests and backup/restore evidence.</td></tr>
+                    <tr><td><strong>P1 · Production</strong></td><td>Resilience and containment</td><td>Document fail-closed behavior, timeout budgets, bounded retries, idempotency, rate limits, circuit breakers, revocation and emergency stop.</td><td>S-PRO runtime / operations</td><td>Fault-injection results, runbooks, alert tests and recovery exercise.</td></tr>
+                    <tr><td><strong>P1 · Production</strong></td><td>Evidence, privacy and monitoring</td><td>Use durable append-only evidence, controlled retention, PII/secret minimization, correlation IDs and export to the bank’s SIEM/OTel stack.</td><td>Joint · bank security</td><td>Evidence reconstruction, retention configuration and SIEM integration test.</td></tr>
+                    <tr><td><strong>P1 · Production</strong></td><td>Policy regression lifecycle</td><td>Re-run positive and negative control suites when models, prompts, tools, permissions, contracts or runtime adapters change.</td><td>S-PRO QA + SHEWIUN</td><td>Versioned test catalogue, change trigger and exact before/after retest.</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div className="sp-no-claim"><strong>Release principle:</strong> a green policy evaluation alone is not a production release decision. The bank must also sign off identity provenance, PEP enforcement, approval semantics, tenant isolation, resilience, monitoring, data handling and residual risk.</div>
             </section>
 
             <section className="sp-section" id="sp-gates">
@@ -609,8 +634,8 @@ export default function Home() {
               <div className="sp-agentproof-grid">
                 <article><span>01 · CONFIGURATION ANALYSIS</span><strong>Agent manifest & authority delta</strong><p>Inspect declared tools, permissions, scopes, transaction types and approval gates. Highlight intended-versus-effective authority gaps, reachable business actions and potentially risky permission compositions.</p><small>Configuration-level findings are labelled potential until runtime evidence supports verification.</small></article>
                 <article><span>02 · CONTRACT / TRACE EVALUATION</span><strong>Expected policy vs. observed runtime</strong><p>Evaluate supplied runtime events against an Authorization Contract. Correlate requests, decisions and outcomes; identify denied actions that still reached execution or actions without a correlated authorization decision.</p><small>Only the supplied event chain and test scope are assessed.</small></article>
-                <article><span>03 · AUTHENTICATED NON-PRODUCTION EVIDENCE</span><strong>Per-agent signed event ingestion</strong><p>Agent-scoped HMAC-SHA256 signatures, timestamp and nonce checks authenticate event submissions from explicitly authorized non-production agents.</p><small>Nonce replay tracking is currently deployment-instance memory, not a distributed durable replay store.</small></article>
-                <article><span>04 · EVIDENCE & FINDINGS</span><strong>Traceable security output</strong><p>Structured findings include severity, claim level, expected and observed behavior, business impact, remediation and blast-radius context. Runtime assessments produce a SHA-256 evidence hash.</p><small>A hash is an integrity reference, not an externally signed or immutable ledger.</small></article>
+                <article><span>03 · AUTHENTICATED NON-PRODUCTION EVIDENCE</span><strong>Per-agent signed event ingestion</strong><p>Agent-scoped HMAC-SHA256 signatures, timestamp and nonce checks authenticate event submissions from explicitly authorized non-production agents.</p><small>Nonce replay tracking is currently deployment-instance memory, not a distributed durable replay store. A shared durable replay store is required before horizontal or production use.</small></article>
+                <article><span>04 · EVIDENCE & FINDINGS</span><strong>Traceable security output</strong><p>Structured findings include severity, claim level, expected and observed behavior, business impact, remediation and blast-radius context. Runtime assessments produce a SHA-256 evidence hash.</p><small>A hash is an integrity reference, not an externally signed or immutable ledger. Independent evidence anchoring and retention controls remain separate requirements.</small></article>
                 <article><span>05 · AGENT IDENTITY VERIFICATION</span><strong>Authenticated discovery & metadata</strong><p>AgentProof includes a verified identity endpoint flow for non-production targets, with an agent identity document and capability, permission, data-scope and approval metadata.</p><small>Production identity federation and customer IdP integration still require engineering and security review.</small></article>
                 <article><span>06 · NON-DESTRUCTIVE RED-TEAM PLANNING</span><strong>Attack hypotheses, not exploit claims</strong><p>A bounded planner can prepare hypotheses for tool abuse, permission escalation, scope escape, approval bypass, data exfiltration and indirect injection. An optional MiniMax M2.7 component generates structured test hypotheses and guardrails.</p><small>Planning is not proof of exploitation. Production attack planning is blocked; this component does not autonomously execute destructive tests.</small></article>
               </div>
@@ -709,7 +734,7 @@ export default function Home() {
             <section className="panel events-panel"><div className="panel-header"><div><div className="panel-kicker">TRACEABILITY</div><h2>Recent authorization decisions</h2></div><Badge tone={auditIntegrity === true ? "good" : auditIntegrity === false ? "bad" : "warn"}>{auditIntegrity === true ? "HASH CHAIN VALID" : auditIntegrity === false ? "HASH CHAIN INVALID" : "INTEGRITY NOT CHECKED"}</Badge><button className="text-button" onClick={() => setSection("laufzeit")} >All events <Icon name="arrow" /></button></div><EventTable events={events.slice(0, 5)} /></section>
           </>}
 
-          {section === "graph" && <section className="panel graph-full"><div className="panel-header"><div><div className="panel-kicker">BUSINESS AUTHORITY GRAPH</div><h2>Authority relationships</h2><p>This view is based on mandates and delegations stored in the backend.</p></div><Badge tone="good">BACKEND DATA</Badge></div><AuthorityGraph nodes={nodes} edges={edges} large /><div className="graph-legend"><span><i className="legend-human" />Human</span><span><i className="legend-agent" />AI agent</span><span><i className="legend-resource" />Resource</span><span><i className="legend-line" />Vollmacht / Delegation</span></div><div className="graph-table"><h3>Graph relationships</h3><table><thead><tr><th>Type</th><th>From</th><th>To</th><th>Limit</th></tr></thead><tbody>{edges.map(e=><tr key={e.id}><td>{displayApiText(e.typ)}</td><td>{displayApiText(e.von)}</td><td>{displayApiText(e.nach)}</td><td>{money(e.limit)}</td></tr>)}</tbody></table></div></section>}
+          {section === "graph" && <section className="panel graph-full"><div className="panel-header"><div><div className="panel-kicker">BUSINESS AUTHORITY GRAPH</div><h2>Authority relationships</h2><p>This view is based on mandates and delegations stored in the backend.</p></div><Badge tone="good">BACKEND DATA</Badge></div><AuthorityGraph nodes={nodes} edges={edges} large /><div className="graph-legend"><span><i className="legend-human" />Human</span><span><i className="legend-agent" />AI agent</span><span><i className="legend-resource" />Resource</span><span><i className="legend-line" />Mandate / delegation</span></div><div className="graph-table"><h3>Graph relationships</h3><table><thead><tr><th>Type</th><th>From</th><th>To</th><th>Limit</th></tr></thead><tbody>{edges.map(e=><tr key={e.id}><td>{displayApiText(e.typ)}</td><td>{displayApiText(e.von)}</td><td>{displayApiText(e.nach)}</td><td>{money(e.limit)}</td></tr>)}</tbody></table></div></section>}
 
           {section === "berechtigungen" && <section className="panel"><div className="panel-header"><div><div className="panel-kicker">EFFECTIVE AUTHORITY</div><h2>Effective permissions</h2><p>Effective authority is the intersection of all valid authority levels.</p></div></div><div className="permission-chain"><div><small>ORIGINAL MANDATE</small><strong>Anna Müller · CFO</strong><b>CHF 100,000</b><span>payment.create · payment.read · payment.approve</span></div><div className="chain-arrow">↓</div><div><small>DELEGATION</small><strong>Payment Agent 01</strong><b>CHF 10,000</b><span>payment.create · payment.read</span></div><div className="chain-arrow">↓</div><div className="effective-result"><small>EFFECTIVE AUTHORITY</small><strong>Minimum effective boundary</strong><b>CHF 10,000</b><span>Further delegation: not permitted</span></div></div><div className="notice"><strong>Decision principle</strong><p>A delegation may restrict rights but can never expand the original mandate. Ambiguous or revoked authority chains are denied.</p></div></section>}
 
