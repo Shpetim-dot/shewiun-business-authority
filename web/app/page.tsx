@@ -414,6 +414,7 @@ export default function Home() {
                 <a href="#sp-agentproof">AgentProof</a>
                 <a href="#sp-evidence-model">Evidence model</a>
                 <a href="#sp-gates">S-PRO gates</a>
+                <a href="#sp-cfa">CFA platform</a>
                 <a href="#sp-pilot">Pilot</a>
               </nav>
             </header>
