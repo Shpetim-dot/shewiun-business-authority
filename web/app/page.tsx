@@ -107,6 +107,43 @@ const assessmentCases = (profile: AssessmentProfile): AssessmentCase[] => {
  ];
 };
 
+
+const displayApiText = (value: string | null | undefined): string => {
+  if (value === null || value === undefined || value === "") return "—";
+  const translations: Record<string, string> = {
+    ORGANISATION: "Organization",
+    ORGANISATIONSZUGEHOERIGKEIT: "Organization membership",
+    ORGANISATIONSRESSOURCE: "Organization resource",
+    MENSCH: "Human",
+    KI_AGENT: "AI agent",
+    RESSOURCE: "Resource",
+    VOLLMACHT: "Original mandate",
+    DELEGATION: "Delegation",
+    DELEGIERTER_ZUGRIFF: "Delegated agent access",
+    AKTIV: "Active",
+    INAKTIV: "Inactive",
+    WIDERRUFEN: "Revoked",
+    ABGELAUFEN: "Expired",
+    "Zahlungsagent 01": "Payment Agent 01",
+    "Lieferant Beispiel AG": "Example Supplier AG",
+    "Keine Verbindungen": "No relationships",
+    "Keine Aktionen hinterlegt": "No actions defined",
+    "ohne Limit": "No limit",
+    "nicht gestattet": "Not permitted",
+    "erlaubt": "Allowed",
+    "nicht erlaubt": "Not allowed",
+    "Prüfung fehlgeschlagen": "Evaluation failed",
+    "Autorisierung verweigert": "Authorization denied",
+    "Betrag überschreitet das Delegationslimit": "Amount exceeds the delegated limit",
+    "Freigabe erforderlich": "Approval required",
+    "Unbekannte Identität": "Unknown identity",
+    "Ungültiger Ressourcen-Scope": "Invalid resource scope",
+    "Mandant nicht autorisiert": "Tenant not authorized"
+  };
+  const text = String(value);
+  return translations[text] || text;
+};
+
 const money = (value: number | string | null | undefined) =>
   value === null || value === undefined ? "—" : new Intl.NumberFormat("en-CH", { style: "currency", currency: "CHF", maximumFractionDigits: 0 }).format(Number(value));
 
@@ -655,7 +692,7 @@ export default function Home() {
 
             <section className="panel test-panel">
               <div className="panel-header"><div><div className="panel-kicker">RUNTIME ENFORCEMENT · TEST ENVIRONMENT</div><h2>Test authorization enforcement</h2><p>The API evaluates the action. Only an allowed request creates a sandbox payment record.</p></div><Badge tone="warn">SYNTHETIC DATA</Badge></div>
-              <div className="test-actions"><div className="test-case"><div><strong>Valid supplier payment</strong><small>CHF 5.000 · within the delegated mandate</small></div><button disabled={busy || apiState !== "verbunden"} className="button button-primary" onClick={() => runPayment(5000)} >Run payment <Icon name="arrow" /></button></div><div className="test-case"><div><strong>Delegated limit exceeded</strong><small>CHF 15.000 · above the delegated mandate limit</small></div><button disabled={busy || apiState !== "verbunden"} className="button button-danger" onClick={() => runPayment(15000)} >Test denial <Icon name="arrow" /></button></div></div>
+              <div className="test-actions"><div className="test-case"><div><strong>Valid supplier payment</strong><small>CHF 5,000 · within the delegated mandate</small></div><button disabled={busy || apiState !== "verbunden"} className="button button-primary" onClick={() => runPayment(5000)} >Run payment <Icon name="arrow" /></button></div><div className="test-case"><div><strong>Delegated limit exceeded</strong><small>CHF 15,000 · above the delegated mandate limit</small></div><button disabled={busy || apiState !== "verbunden"} className="button button-danger" onClick={() => runPayment(15000)} >Test denial <Icon name="arrow" /></button></div></div>
               {result && <div className={result.ok ? "result-box result-good" : "result-box result-bad"}><span>{result.ok ? "✓" : "!"}</span><div><strong>{result.ok ? "Action authorized" : "Action denied"}</strong><p>{result.text}</p></div></div>}
             </section>
 
@@ -674,7 +711,7 @@ export default function Home() {
 
           {section === "graph" && <section className="panel graph-full"><div className="panel-header"><div><div className="panel-kicker">BUSINESS AUTHORITY GRAPH</div><h2>Authority relationships</h2><p>This view is based on mandates and delegations stored in the backend.</p></div><Badge tone="good">BACKEND DATA</Badge></div><AuthorityGraph nodes={nodes} edges={edges} large /><div className="graph-legend"><span><i className="legend-human" />Human</span><span><i className="legend-agent" />AI agent</span><span><i className="legend-resource" />Resource</span><span><i className="legend-line" />Vollmacht / Delegation</span></div><div className="graph-table"><h3>Graph relationships</h3><table><thead><tr><th>Typ</th><th>Von</th><th>Nach</th><th>Limit</th></tr></thead><tbody>{edges.map(e=><tr key={e.id}><td>{e.typ}</td><td>{e.von}</td><td>{e.nach}</td><td>{money(e.limit)}</td></tr>)}</tbody></table></div></section>}
 
-          {section === "berechtigungen" && <section className="panel"><div className="panel-header"><div><div className="panel-kicker">EFFECTIVE AUTHORITY</div><h2>Effective permissions</h2><p>Effective authority is the intersection of all valid authority levels.</p></div></div><div className="permission-chain"><div><small>ORIGINAL MANDATE</small><strong>Anna Müller · CFO</strong><b>CHF 100.000</b><span>payment.create · payment.read · payment.approve</span></div><div className="chain-arrow">↓</div><div><small>DELEGATION</small><strong>Zahlungsagent 01</strong><b>CHF 10.000</b><span>payment.create · payment.read</span></div><div className="chain-arrow">↓</div><div className="effective-result"><small>EFFECTIVE AUTHORITY</small><strong>Minimum effective boundary</strong><b>CHF 10.000</b><span>Further delegation: not permitted</span></div></div><div className="notice"><strong>Decision principle</strong><p>A delegation may restrict rights but can never expand the original mandate. Ambiguous or revoked authority chains are denied.</p></div></section>}
+          {section === "berechtigungen" && <section className="panel"><div className="panel-header"><div><div className="panel-kicker">EFFECTIVE AUTHORITY</div><h2>Effective permissions</h2><p>Effective authority is the intersection of all valid authority levels.</p></div></div><div className="permission-chain"><div><small>ORIGINAL MANDATE</small><strong>Anna Müller · CFO</strong><b>CHF 100,000</b><span>payment.create · payment.read · payment.approve</span></div><div className="chain-arrow">↓</div><div><small>DELEGATION</small><strong>Payment Agent 01</strong><b>CHF 10,000</b><span>payment.create · payment.read</span></div><div className="chain-arrow">↓</div><div className="effective-result"><small>EFFECTIVE AUTHORITY</small><strong>Minimum effective boundary</strong><b>CHF 10,000</b><span>Further delegation: not permitted</span></div></div><div className="notice"><strong>Decision principle</strong><p>A delegation may restrict rights but can never expand the original mandate. Ambiguous or revoked authority chains are denied.</p></div></section>}
 
 
           {section === "autorisierung" && <div className="authorization-workspace">
@@ -739,7 +776,7 @@ export default function Home() {
                   <label><input type="checkbox" checked={authInput.approval_present} onChange={e => setAuthInput(v => ({ ...v, approval_present: e.target.checked }))} /> Present</label>
                   <label><input type="checkbox" checked={authInput.approval_fresh} onChange={e => setAuthInput(v => ({ ...v, approval_fresh: e.target.checked }))} /> Fresh</label>
                 </div>
-                {authError && <div className="result-box result-bad"><span>!</span><div><strong>Evaluation failed</strong><p>{authError}</p></div></div>}
+                {authError && <div className="result-box result-bad"><span>!</span><div><strong>Evaluation failed</strong><p>{displayApiText(authError)}</p></div></div>}
                 <div className="auth-submit-row"><button disabled={authBusy || apiState !== "verbunden" || !authInput.amount} className="button button-primary" onClick={runAuthorizationEvaluation}>{authBusy ? "Evaluating …" : "Evaluate policy server-side"} <Icon name="arrow" /></button><span>No payment is executed in this tab.</span></div>
               </section>
 
@@ -747,12 +784,12 @@ export default function Home() {
                 <div className="panel-header"><div><div className="panel-kicker">DECISION TRACE</div><h2>Evaluation result</h2><p>Individual control checks instead of an opaque aggregate score.</p></div></div>
                 {!authEvaluation ? <div className="auth-empty">Choose a test case and run the policy evaluation. The decision and individual checks will appear here.</div> : <>
                   <div className={authEvaluation.entscheidung === "ALLOW" ? "auth-decision auth-allow" : "auth-decision auth-deny"}>
-                    <div><small>POLICY DECISION</small><strong>{authEvaluation.entscheidung}</strong><span>{authEvaluation.grund}</span></div>
+                    <div><small>POLICY DECISION</small><strong>{authEvaluation.entscheidung}</strong><span>{displayApiText(authEvaluation.grund)}</span></div>
                     <Badge tone={authEvaluation.entscheidung === "ALLOW" ? "good" : "bad"}>{authEvaluation.entscheidung === "ALLOW" ? "ALLOWED" : "DENIED"}</Badge>
                   </div>
                   <div className="auth-check-list">{authEvaluation.checks.map(check => <div className="auth-check-row" key={check.control}>
                     <span className={check.result === "pass" ? "auth-check-state pass" : check.result === "fail" ? "auth-check-state fail" : "auth-check-state na"}>{check.result === "pass" ? "PASS" : check.result === "fail" ? "FAIL" : "N/A"}</span>
-                    <div><strong>{({ identity: "Identity", permission: "Tool / permission", purpose: "Business purpose", resource_scope: "Resource scope", business_authority: "Business authority", parameters: "Parameters & limits", approval: "Approval" } as Record<string, string>)[check.control] || check.control}</strong><p>{check.detail}</p></div>
+                    <div><strong>{({ identity: "Identity", permission: "Tool / permission", purpose: "Business purpose", resource_scope: "Resource scope", business_authority: "Business authority", parameters: "Parameters & limits", approval: "Approval" } as Record<string, string>)[check.control] || check.control}</strong><p>{displayApiText(check.detail)}</p></div>
                   </div>)}</div>
                   <div className="auth-evidence"><div><small>DECISION ID</small><code>{authEvaluation.decision_id}</code></div><div><small>POLICY</small><code>{authEvaluation.policy_version}</code></div><div><small>DELEGATION PATH</small><code>{authEvaluation.delegationspfad.join(" → ") || "—"}</code></div></div>
                   <p className="auth-trust-note">Claim level: policy evaluation · runtime execution observed: no. Approval state is a demo test input, not a cryptographically verified human approval.</p>
@@ -770,7 +807,7 @@ export default function Home() {
           {section === "assessment" && <div className="assessment-workspace">
             <section className="panel assessment-hero"><div><div className="panel-kicker">M2.7 LITE · AUTHORIZATION ASSESSMENT</div><h2>What can an agent do with its effective permissions?</h2><p>Define the allowed boundary, challenge it with controlled scenarios and verify that the policy allows or denies as expected. Every test is evaluated server-side and receives a decision ID.</p><div className="assessment-tags"><span>Authorization Contract</span><span>Parameter & Scope</span><span>Composition</span><span>Evidence-backed</span><span>Exact Retest</span></div></div><div className="assessment-run-card"><small>ASSESSMENT PROFILE</small><div className="profile-switch"><button className={assessmentProfile==="lite"?"selected":""} onClick={()=>setAssessmentProfile("lite")}>M2.7 Lite · 40</button><button className={assessmentProfile==="continuous"?"selected":""} onClick={()=>setAssessmentProfile("continuous")}>Continuous · 67</button></div><strong>{assessmentBusy?assessmentProgress+" / "+(assessmentProfile==="lite"?40:67)+" TESTS":assessmentResults.length?assessmentResults.filter(x=>x.matched).length+" / "+assessmentResults.length+" MATCHED":"READY TO RUN"}</strong><div className="assessment-progress"><i style={{width:(assessmentProgress/(assessmentProfile==="lite"?40:67)*100)+"%"}}/></div><p>{assessmentResults.length?"Policy-Entscheidungen aus dem letzten Testlauf.":"40 Tests für 1 Agent / 1 MCP-ähnliche Tool-Oberfläche / 1 kritischen Workflow."}</p><button className="button button-primary" disabled={assessmentBusy||apiState!=="verbunden"} onClick={()=>runSecurityAssessment()}>{assessmentBusy?"Assessment läuft …":"Assessment starten"} <Icon name="arrow"/></button>{assessmentResults.length>0&&<button className="button button-secondary report-button" onClick={exportAssessmentReport}>JSON-Evidence exportieren</button>}</div></section>
             <div className="assessment-kpis"><article><small>TESTS</small><strong>{assessmentProfile==="lite"?"40":"67"}</strong><span>{assessmentProfile==="lite"?"M2.7 Lite":"Continuous Assurance"}</span></article><article><small>COMPOSITION</small><strong>{assessmentProfile==="lite"?"3":"10"}</strong><span>Combined control boundaries</span></article><article><small>POSITIVE CONTROLS</small><strong>{assessmentProfile==="lite"?"6":"14"}</strong><span>Legitimate actions remain possible</span></article><article><small>WORKFLOW</small><strong>1</strong><span>Agent · payment workflow · sandbox</span></article></div>
-            <section className="panel"><div className="panel-header"><div><div className="panel-kicker">AUTHORIZATION CONTRACT</div><h2>The authorization boundary under test</h2><p>A test is meaningful only when the expected business authority is defined in advance.</p></div><Badge tone="good">CONTRACT DEFINED</Badge></div><div className="contract-grid">{[["Principal","Payment Agent 01","Registered demo issuer"],["Acting for","Anna Müller · CFO","Synthetic principal"],["Resource","Corporate Account · 1001","Tenant-scoped resource"],["Action","payment.create","Kritischer Supplier payments-Workflow"],["Limit","CHF 10.000","Aus Delegationskette berechnet"],["Approval","Ab CHF 7.500","Demo input, not cryptographically signed"]].map(([a,b,c])=><article key={a}><small>{a}</small><strong>{b}</strong><p>{c}</p></article>)}</div></section>
+            <section className="panel"><div className="panel-header"><div><div className="panel-kicker">AUTHORIZATION CONTRACT</div><h2>The authorization boundary under test</h2><p>A test is meaningful only when the expected business authority is defined in advance.</p></div><Badge tone="good">CONTRACT DEFINED</Badge></div><div className="contract-grid">{[["Principal","Payment Agent 01","Registered demo issuer"],["Acting for","Anna Müller · CFO","Synthetic principal"],["Resource","Corporate Account · 1001","Tenant-scoped resource"],["Action","payment.create","Kritischer Supplier payments-Workflow"],["Limit","CHF 10.000","Aus Delegationskette berechnet"],["Approval","Ab CHF 7,500","Demo input, not cryptographically signed"]].map(([a,b,c])=><article key={a}><small>{a}</small><strong>{b}</strong><p>{c}</p></article>)}</div></section>
             <section className="panel"><div className="panel-header"><div><div className="panel-kicker">TEST COVERAGE</div><h2>What is actually tested?</h2><p>The 40 Lite cases include boundary tests and permission-composition scenarios.</p></div><Badge tone="warn">POLICY LEVEL</Badge></div><div className="coverage-grid">{[["Identity & tenant","Agent, principal, issuer and tenant"],["Permission composition","Bind tool, permission and business action exactly"],["Purpose & context","Purpose deviation and context switching"],["Resource scope","Account scope, foreign resource and global wildcards"],["Parameters","Amount limits, currency and boundary values"],["Approval boundary","Present, fresh and combined states"],["MCP surface","MCP-like tool contract checks; no live MCP interceptor"],["Replay observation","Repeated PDP request; no cryptographic replay defense"]].map(([a,b])=><article key={a}><strong>{a}</strong><p>{b}</p></article>)}</div></section>
             <section className="panel"><div className="panel-header"><div><div className="panel-kicker">LIVE RESULTS · EXPECTED VS OBSERVED</div><h2>Security Assessment Evidence</h2><p>An expected DENY is a passing control test. An unexpected ALLOW or API error is marked as a deviation.</p></div><Badge tone={assessmentResults.length&&assessmentResults.every(x=>x.matched)?"good":assessmentResults.length?"bad":"neutral"}>{assessmentResults.length?assessmentResults.every(x=>x.matched)?"ALL EXPECTATIONS MET":"DEVIATION DETECTED":"NO RUN"}</Badge></div>{assessmentResults.length===0?<div className="assessment-empty">Start the assessment. The suite sends real policy requests to the SHEWIUN demo backend; results are not simulated.</div>:<><div className="assessment-summary"><strong>{assessmentResults.filter(x=>x.matched).length} / {assessmentResults.length} as expected</strong><span>{assessmentResults.filter(x=>!x.matched).length} deviations</span><span>{assessmentResults.filter(x=>x.actual==="ALLOW").length} ALLOW</span><span>{assessmentResults.filter(x=>x.actual==="DENY").length} DENY</span></div><div className="assessment-result-list">{assessmentResults.map(item=><article key={item.id} className="assessment-result"><div className={item.matched?"result-indicator pass":"result-indicator fail"}>{item.matched?"PASS":"GAP"}</div><div className="assessment-result-main"><small>{item.category} · TEST {item.id}</small><strong>{item.title}</strong><p>{item.reason}</p><div className="assessment-check-pills">{item.checks.map(check=><span key={check.control} className={check.result}>{check.control}: {check.result}</span>)}</div>{item.decision_id&&<code>{item.decision_id}</code>}</div><div className="assessment-expected"><small>EXPECTED / OBSERVED</small><strong>{item.expected} / {item.actual}</strong></div></article>)}</div></>}</section>
             <section className="panel"><div className="panel-header"><div><div className="panel-kicker">METHODOLOGY</div><h2>Define → Challenge → Observe → Retest</h2></div></div><div className="method-flow"><article><small>01 · DEFINE</small><strong>Authorization Contract</strong><p>Identity, purpose, action, scope, limits and approval.</p></article><b>→</b><article><small>02 · CHALLENGE</small><strong>40+ Test Cases</strong><p>Parameter boundaries, scope escape and composition.</p></article><b>→</b><article><small>03 · OBSERVE</small><strong>Evidence-backed Findings</strong><p>Decision ID, policy version, checks and reason code.</p></article><b>→</b><article><small>04 · RETEST</small><strong>Exact Replay</strong><p>Same test catalogue against the updated policy.</p></article></div><p className="claim-note">Replay here repeats the policy request; it does not prove cryptographic nonce/replay protection. Approval is a demo input, not a signed capability.</p></section>
@@ -863,7 +900,7 @@ function AuthorityGraph({ nodes, edges, large = false }: { nodes: GraphNode[]; e
             aria-label={`Select ${node.label}`}>
             <rect width={p.w} height={p.h} rx="5" className={`node node-${p.type} ${isSelected ? "node-selected" : ""}`} />
             <circle cx="17" cy="18" r="4" className={`node-indicator indicator-${p.type}`} />
-            <text x="30" y="23" className="node-title">{node.label}</text>
+            <text x="30" y="23" className="node-title">{displayApiText(node.label)}</text>
             <text x="15" y="47" className="node-sub">{displayApiText(node.beschreibung || node.typ)}</text>
             <text x="15" y="64" className="node-state">{displayApiText(node.status)}</text>
           </g>;
@@ -877,7 +914,7 @@ function AuthorityGraph({ nodes, edges, large = false }: { nodes: GraphNode[]; e
     <div className="graph-edge-list">
       <div className="graph-edge-list-head"><strong>Authorization relationships</strong><span>{edges.length} relationships</span></div>
       {edges.filter(edge => !edge.typ.startsWith("ORGANISATION")).map(edge => <div className="graph-edge-row" key={edge.id}>
-        <div><strong>{displayApiText(edge.typ)}</strong><small>{nodes.find(n=>n.id===edge.von)?.label || edge.von} → {nodes.find(n=>n.id===edge.nach)?.label || edge.nach}</small></div>
+        <div><strong>{displayApiText(edge.typ)}</strong><small>{displayApiText(nodes.find(n=>n.id===edge.von)?.label || edge.von)} → {displayApiText(nodes.find(n=>n.id===edge.nach)?.label || edge.nach)}</small></div>
         <span>{edge.limit == null ? "No limit" : money(edge.limit)} {edge.waehrung || ""}</span>
         <small>{edge.aktionen?.join(" · ") || "No actions defined"}</small>
         <Badge tone={edge.delegierbar === false ? "bad" : edge.delegierbar ? "good" : "neutral"}>{edge.delegierbar === false ? "Further delegation prohibited" : edge.delegierbar ? "Further delegation allowed" : "Direct relationship"}</Badge>
