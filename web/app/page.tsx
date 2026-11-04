@@ -482,11 +482,13 @@ export default function Home() {
               <div className="sp-source-links">
                 <span>Relevant S-PRO references:</span>
                 <a href="https://s-pro.io/" target="_blank" rel="noreferrer">Financial-services portfolio ↗</a>
+                <a href="https://s-pro.io/blog/agentic-banking" target="_blank" rel="noreferrer">Agentic banking use cases ↗</a>
                 <a href="https://s-pro.io/ai-agents-aml-transaction-monitoring-bank/" target="_blank" rel="noreferrer">AML & transaction monitoring ↗</a>
                 <a href="https://s-pro.io/ai-for-wealth-and-asset-managers/" target="_blank" rel="noreferrer">Wealth management ↗</a>
-                <a href="https://s-pro.io/ai-agent-production-gates-bank" target="_blank" rel="noreferrer">S-PRO’s six production gates ↗</a>
-                <a href="https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/" target="_blank" rel="noreferrer">OWASP Agentic Top 10 ↗</a>
+                <a href="https://s-pro.io/blog/automated-control-testing" target="_blank" rel="noreferrer">Automated control testing ↗</a>
+                <a href="https://s-pro.io/blog/ai-pilot-to-production-bank" target="_blank" rel="noreferrer">Go / no-go questions ↗</a>
                 <a href="https://s-pro.io/ai-proof-of-concept-to-production-bank" target="_blank" rel="noreferrer">Pilot-to-production approach ↗</a>
+                <a href="https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/" target="_blank" rel="noreferrer">OWASP Agentic Top 10 ↗</a>
               </div>
             </section>
 
