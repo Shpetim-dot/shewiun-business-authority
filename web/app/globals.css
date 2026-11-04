@@ -842,3 +842,59 @@ button:focus-visible,a:focus-visible{outline:3px solid #9bbcff;outline-offset:3p
   .sp-summary-row{grid-template-columns:66px 1fr}
   .sp-contract-output>div{grid-template-columns:125px 1fr}
 }
+
+
+/* CISO / security assessment sections */
+.sp-threat-table-wrap{
+  width:100%;overflow-x:auto;border:1px solid #dce5f1;border-radius:8px;
+  background:#fff;box-shadow:0 3px 12px rgba(19,43,73,.035)
+}
+.sp-threat-table{width:100%;min-width:1080px;border-collapse:collapse;text-align:left;white-space:normal}
+.sp-threat-table th{
+  padding:13px 14px;background:#edf3fb;border-top:0;border-bottom:1px solid #dce5f1;
+  color:#3f5b7d;font-size:9px;letter-spacing:.65px;font-weight:800
+}
+.sp-threat-table td{
+  padding:13px 14px;vertical-align:top;border-bottom:1px solid #e7edf5;
+  color:#586f8b;font-size:10px;line-height:1.75
+}
+.sp-threat-table tr:last-child td{border-bottom:0}
+.sp-threat-table tr:hover td{background:#f9fbff}
+.sp-threat-table td strong{display:block;margin-bottom:4px;color:#193a63;font-size:11px}
+.sp-threat-table td small{display:block;color:#7a8da6;font-size:8px;letter-spacing:.35px;text-transform:uppercase}
+.sp-agentproof-grid,.sp-gate-grid,.sp-cfa-grid{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px
+}
+.sp-agentproof-grid article,.sp-gate-grid article,.sp-cfa-grid article{
+  min-width:0;padding:18px 19px;background:#fff;border:1px solid #dce5f1;
+  border-radius:8px;box-shadow:0 3px 12px rgba(19,43,73,.035)
+}
+.sp-agentproof-grid article>span,.sp-gate-grid article>span{
+  display:block;margin-bottom:10px;color:#2457d6;font:800 8px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;
+  letter-spacing:.8px
+}
+.sp-agentproof-grid article>strong,.sp-gate-grid article>strong,.sp-cfa-grid article>strong{
+  display:block;color:#193a63;font-size:12px;line-height:1.45
+}
+.sp-agentproof-grid article>p,.sp-gate-grid article>p,.sp-cfa-grid article>p{
+  margin:8px 0 0;color:#5d728e;font-size:10px;line-height:1.8
+}
+.sp-agentproof-grid article>small,.sp-gate-grid article>small{
+  display:block;margin-top:11px;padding-top:10px;border-top:1px solid #e8eef6;
+  color:#7b8da5;font-size:9px;line-height:1.7
+}
+.sp-gate-grid article{border-top:3px solid #7ba3ec}
+.sp-cfa-grid article{background:#f9fbff}
+.sp-limit-note{font-size:10px;line-height:1.85}
+.sp-no-claim{font-size:10px;line-height:1.85}
+.sp-acceptance>div{font-size:10px;line-height:1.75}
+.sp-threat-table-wrap+.sp-no-claim{margin-top:14px}
+@media(max-width:1120px){
+  .sp-agentproof-grid,.sp-gate-grid,.sp-cfa-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:760px){
+  .sp-agentproof-grid,.sp-gate-grid,.sp-cfa-grid{grid-template-columns:1fr}
+  .sp-threat-table{min-width:1040px}
+  .sp-threat-table td{font-size:9px}
+  .sp-agentproof-grid article,.sp-gate-grid article,.sp-cfa-grid article{padding:16px}
+}
